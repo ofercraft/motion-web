@@ -1,36 +1,61 @@
+const googleSansFlexUrl = new URL('./fonts/google_sans_flex.ttf', import.meta.url).href;
+const materialSymbolsUrl = new URL('./fonts/material_symbols_rounded.ttf', import.meta.url).href;
+
+function ensureMotionStyles() {
+  if (document.getElementById('motion-web-fonts')) return;
+  const style = document.createElement('style');
+  style.id = 'motion-web-fonts';
+  style.textContent = `
+    @font-face {
+      font-family: 'Motion Google Sans Flex';
+      src: url('${googleSansFlexUrl}') format('truetype');
+      font-weight: 1 1000;
+      font-stretch: 25% 151%;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Motion Material Symbols Rounded';
+      src: url('${materialSymbolsUrl}') format('truetype');
+      font-weight: 100 700;
+      font-style: normal;
+    }
+    @property --motion-symbol-fill {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: 0;
+    }
+  `;
+  document.head.append(style);
+}
+
 const motionSpecs = {
   none: {
-    shape: { type: 'snap' },
+    corner: { type: 'snap' },
     font: { type: 'snap' },
-    colorDuration: 0,
-    symbolDuration: 0,
+    color: { duration: 0, easing: 'linear' },
+    symbol: { duration: 0, easing: 'linear' },
   },
   low: {
-    shape: { dampingRatio: 0.8, stiffness: 600 },
-    font: { dampingRatio: 0.8, stiffness: 600 },
-    colorDuration: 90,
-    symbolDuration: 100,
+    corner: { type: 'spring', dampingRatio: 0.8, stiffness: 600 },
+    font: { type: 'spring', dampingRatio: 0.8, stiffness: 600 },
+    color: { duration: 90, easing: 'linear' },
+    symbol: { duration: 100, easing: 'cubic-bezier(0, 0, .2, 1)' },
   },
   medium: {
-    shape: { dampingRatio: 0.4, stiffness: 400 },
-    font: { dampingRatio: 0.3, stiffness: 400 },
-    colorDuration: 120,
-    symbolDuration: 140,
+    corner: { type: 'spring', dampingRatio: 0.4, stiffness: 400 },
+    font: { type: 'spring', dampingRatio: 0.3, stiffness: 400 },
+    color: { duration: 120, easing: 'cubic-bezier(.4, 0, .2, 1)' },
+    symbol: { duration: 140, easing: 'cubic-bezier(.4, 0, .2, 1)' },
   },
   high: {
-    shape: { dampingRatio: 0.25, stiffness: 250 },
-    font: { dampingRatio: 0.25, stiffness: 250 },
-    colorDuration: 160,
-    symbolDuration: 180,
+    corner: { type: 'spring', dampingRatio: 0.25, stiffness: 250 },
+    font: { type: 'spring', dampingRatio: 0.25, stiffness: 250 },
+    color: { duration: 160, easing: 'cubic-bezier(.4, 0, .2, 1)' },
+    symbol: { duration: 180, easing: 'cubic-bezier(.4, 0, .2, 1)' },
   },
 };
 
 const styles = `
-  @property --motion-symbol-weight { syntax: '<number>'; inherits: true; initial-value: 400; }
-  @property --motion-symbol-fill { syntax: '<number>'; inherits: true; initial-value: 0; }
-  @property --motion-symbol-grad { syntax: '<number>'; inherits: true; initial-value: 100; }
-  @property --motion-symbol-opsz { syntax: '<number>'; inherits: true; initial-value: 24; }
-
   :host {
     display: inline-block;
     max-width: 100%;
@@ -50,88 +75,86 @@ const styles = `
     height: var(--motion-button-height, 80px);
     margin: 0;
     overflow: hidden;
-    border: var(--motion-button-outline-width, 0) solid var(--motion-button-outline-color, transparent);
-    border-radius: var(--motion-button-radius, 50%);
+    border-style: solid;
+    border-width: var(--motion-outline-width, 0px);
+    border-color: var(--motion-outline-color, transparent);
+    border-radius: var(--motion-radius, 999px);
     padding: var(--motion-button-padding, 0);
-    color: var(--motion-button-color, var(--mat-sys-on-primary, #fff));
-    background: var(--motion-button-background, var(--mat-sys-primary, #65558f));
+    color: var(--motion-fg, var(--mat-sys-on-primary, #fff));
+    background-color: var(--motion-bg, var(--mat-sys-primary, #65558f));
     cursor: pointer;
     appearance: none;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     transition:
-      border-radius var(--motion-shape-duration) var(--motion-shape-easing),
-      border-width var(--motion-shape-duration) var(--motion-shape-easing),
-      background-color var(--motion-color-duration) cubic-bezier(.4, 0, .2, 1),
-      color var(--motion-color-duration) cubic-bezier(.4, 0, .2, 1),
-      border-color var(--motion-color-duration) cubic-bezier(.4, 0, .2, 1);
+      background-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
+      color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
+      border-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1));
   }
 
   :host([vertical]) button { flex-direction: column; }
 
   button:focus-visible {
-    outline: 3px solid color-mix(in srgb, var(--motion-button-background, #65558f), transparent 38%);
+    outline: 3px solid color-mix(in srgb, var(--motion-bg, #65558f), transparent 38%);
     outline-offset: 3px;
   }
 
   button:disabled {
-    opacity: .38;
+    color: color-mix(in srgb, var(--mat-sys-surface, #fff) 62%, var(--mat-sys-on-surface-variant, #49454f) 38%);
+    background-color: color-mix(in srgb, var(--mat-sys-surface, #fff) 90%, var(--mat-sys-on-surface, #1d1b20) 10%);
+    border-color: color-mix(in srgb, var(--mat-sys-surface, #fff) 62%, var(--motion-outline-color, transparent) 38%);
     cursor: default;
   }
 
-  :host([selected]) button {
-    color: var(--motion-button-selected-color, var(--mat-sys-on-secondary, #fff));
-    background: var(--motion-button-selected-background, var(--mat-sys-secondary, #625b71));
-    border-radius: var(--motion-button-selected-radius, 25%);
-  }
-
-  :host([pressed]) button {
-    border-radius: var(--motion-button-pressed-radius, 30%);
-  }
-
-  :host([selected][pressed]) button {
-    border-radius: var(--motion-button-selected-pressed-radius, 40%);
-  }
-
-  .icon,
-  .label {
+  ::slotted(.icon),
+  ::slotted(.label) {
     position: relative;
     z-index: 1;
     pointer-events: none;
   }
 
-  .icon {
+  ::slotted(.icon) {
     flex: 0 0 auto;
     display: grid;
     place-items: center;
     width: var(--motion-button-icon-size, 24px);
     height: var(--motion-button-icon-size, 24px);
-    font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif;
-    font-size: var(--motion-button-icon-size, 24px);
+    font-family: 'Motion Material Symbols Rounded', 'Material Symbols Rounded', sans-serif;
+    font-size: calc(var(--motion-button-icon-size, 24px) * .92);
     font-style: normal;
+    font-weight: normal;
     line-height: 1;
     letter-spacing: normal;
     text-transform: none;
     white-space: nowrap;
     font-feature-settings: 'liga';
     font-variation-settings:
-      'FILL' var(--motion-symbol-fill),
-      'wght' var(--motion-symbol-weight),
-      'GRAD' var(--motion-symbol-grad),
-      'opsz' var(--motion-symbol-opsz);
+      'FILL' var(--motion-symbol-fill, 0),
+      'wght' var(--motion-symbol-weight, 700),
+      'GRAD' var(--motion-symbol-grad, 100),
+      'opsz' var(--motion-symbol-opsz, 24);
     -webkit-font-smoothing: antialiased;
-    transition:
-      --motion-symbol-weight var(--motion-font-duration) var(--motion-font-easing),
-      --motion-symbol-fill var(--motion-symbol-duration) cubic-bezier(.4, 0, .2, 1),
-      --motion-symbol-grad var(--motion-font-duration) var(--motion-font-easing),
-      --motion-symbol-opsz var(--motion-font-duration) var(--motion-font-easing);
+    transition: --motion-symbol-fill var(--motion-symbol-duration, 140ms) var(--motion-symbol-easing, cubic-bezier(.4, 0, .2, 1));
   }
 
-  .label {
+  ::slotted(.label) {
     overflow: hidden;
-    font: inherit;
+    font-family: 'Motion Google Sans Flex', var(--motion-button-font-family, sans-serif);
+    font-size: var(--motion-button-font-size, 24px);
+    font-style: normal;
+    line-height: 1.15;
+    text-align: start;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-variation-settings:
+      'wght' var(--motion-font-weight, 600),
+      'wdth' var(--motion-font-width, 100),
+      'ROND' var(--motion-font-round, 200);
+  }
+
+  :host([vertical]) ::slotted(.label) {
+    text-align: center;
+    white-space: normal;
   }
 
   .ripple {
@@ -154,11 +177,47 @@ const styles = `
   }
 `;
 
+const fontAxes = {
+  default: () => ({ weight: 600, width: 100, round: 200 }),
+  defaultPressed: level => level === 'high'
+    ? { weight: 500, width: 115, round: 200 }
+    : level === 'medium'
+      ? { weight: 550, width: 110, round: 200 }
+      : { weight: 600, width: 100, round: 200 },
+  selected: () => ({ weight: 600, width: 110, round: 200 }),
+  selectedPressed: level => level === 'high'
+    ? { weight: 500, width: 85, round: 200 }
+    : level === 'medium'
+      ? { weight: 550, width: 90, round: 200 }
+      : { weight: 600, width: 110, round: 200 },
+};
+
+const symbolAxes = {
+  default: () => ({ weight: 700, fill: 0, grad: 100, opsz: 24 }),
+  defaultPressed: level => level === 'high'
+    ? { weight: 500, fill: 0, grad: 50, opsz: 30 }
+    : level === 'medium'
+      ? { weight: 600, fill: 0, grad: 70, opsz: 10 }
+      : { weight: 700, fill: 0, grad: 100, opsz: 24 },
+  selected: level => level === 'none'
+    ? { weight: 700, fill: 1, grad: 100, opsz: 24 }
+    : level === 'low'
+      ? { weight: 600, fill: 1, grad: 100, opsz: 12 }
+      : { weight: 500, fill: 1, grad: 100, opsz: 24 },
+  selectedPressed: level => level === 'high'
+    ? { weight: 200, fill: 1, grad: -30, opsz: 16 }
+    : level === 'medium'
+      ? { weight: 300, fill: 1, grad: 0, opsz: 20 }
+      : level === 'low'
+        ? { weight: 600, fill: 1, grad: 100, opsz: 12 }
+        : { weight: 700, fill: 1, grad: 100, opsz: 24 },
+};
+
 export class MotionButton extends HTMLElement {
   static observedAttributes = [
     'icon', 'label', 'aria-label', 'selected', 'disabled', 'vertical',
-    'haptics-enabled', 'motion-level', 'width', 'height', 'icon-size',
-    'content-padding', 'content-gap',
+    'haptics-enabled', 'motion-level', 'width', 'height', 'font-size',
+    'icon-size', 'content-padding', 'content-gap',
   ];
 
   #button;
@@ -166,20 +225,33 @@ export class MotionButton extends HTMLElement {
   #label;
   #pressTimer = null;
   #rippleTimer = null;
+  #frame = null;
+  #lastFrameTime = 0;
+  #visuallyPressed = false;
+  #initialized = false;
+  #resizeObserver;
+  #defaultState = {};
+  #defaultPressedState = {};
+  #selectedState = {};
+  #selectedPressedState = {};
+  #motionSpec = null;
+  #values = {};
+  #targets = {};
+  #velocities = {};
 
   constructor() {
     super();
+    ensureMotionStyles();
     const root = this.attachShadow({ mode: 'open' });
     root.innerHTML = `
       <style>${styles}</style>
       <button part="button" type="button">
-        <span class="icon" part="icon" aria-hidden="true"></span>
-        <span class="label" part="label"></span>
+        <slot name="icon"></slot>
+        <slot name="label"></slot>
       </button>
     `;
     this.#button = root.querySelector('button');
-    this.#icon = root.querySelector('.icon');
-    this.#label = root.querySelector('.label');
+    this.#resizeObserver = new ResizeObserver(() => this.#renderNumericState());
 
     this.#button.addEventListener('pointerdown', event => this.#onPointerDown(event));
     for (const type of ['pointerup', 'pointercancel', 'pointerleave', 'blur']) {
@@ -192,12 +264,17 @@ export class MotionButton extends HTMLElement {
   }
 
   connectedCallback() {
+    this.#ensureContent();
+    this.#resizeObserver.observe(this.#button);
     this.#sync();
   }
 
   disconnectedCallback() {
     this.#endPress();
+    this.#resizeObserver.disconnect();
     clearTimeout(this.#rippleTimer);
+    cancelAnimationFrame(this.#frame);
+    this.#frame = null;
   }
 
   attributeChangedCallback() {
@@ -214,13 +291,23 @@ export class MotionButton extends HTMLElement {
   set disabled(value) { this.toggleAttribute('disabled', Boolean(value)); }
   get motionLevel() { return this.getAttribute('motion-level') ?? 'medium'; }
   set motionLevel(value) { this.#setStringAttribute('motion-level', value); }
+  get motionSpec() { return this.#motionSpec; }
+  set motionSpec(value) { this.#motionSpec = value; this.#syncTargetState(); }
+  get defaultState() { return this.#defaultState; }
+  set defaultState(value) { this.#defaultState = value ?? {}; this.#syncTargetState(); }
+  get defaultPressedState() { return this.#defaultPressedState; }
+  set defaultPressedState(value) { this.#defaultPressedState = value ?? {}; this.#syncTargetState(); }
+  get selectedState() { return this.#selectedState; }
+  set selectedState(value) { this.#selectedState = value ?? {}; this.#syncTargetState(); }
+  get selectedPressedState() { return this.#selectedPressedState; }
+  set selectedPressedState(value) { this.#selectedPressedState = value ?? {}; this.#syncTargetState(); }
 
   focus(options) {
     this.#button.focus(options);
   }
 
   #sync() {
-    if (!this.#button) return;
+    if (!this.#button || !this.#icon || !this.#label) return;
     const icon = this.icon;
     const label = this.label;
     this.#icon.textContent = icon;
@@ -230,43 +317,164 @@ export class MotionButton extends HTMLElement {
     this.#button.disabled = this.disabled;
     this.#button.setAttribute('aria-label', this.getAttribute('aria-label') || label || icon);
     this.#button.setAttribute('aria-pressed', String(this.selected));
-    this.hasAttribute('pressed')
-      ? this.#applyPressedSymbolState()
-      : this.#applyRestingSymbolState();
 
     this.#setSize('--motion-button-width', this.getAttribute('width'));
     this.#setSize('--motion-button-height', this.getAttribute('height'));
+    this.#setSize('--motion-button-font-size', this.getAttribute('font-size'));
     this.#setSize('--motion-button-icon-size', this.getAttribute('icon-size'));
     this.#setSize('--motion-button-content-gap', this.getAttribute('content-gap'));
     this.#button.style.setProperty('--motion-button-padding', this.getAttribute('content-padding') || '0');
-    this.#applyMotionSpec();
+    this.#syncTargetState();
   }
 
-  #setStringAttribute(name, value) {
-    if (value === null || value === undefined || value === '') this.removeAttribute(name);
-    else this.setAttribute(name, String(value));
+  #ensureContent() {
+    this.#icon = this.querySelector('[data-motion-icon]');
+    if (!this.#icon) {
+      this.#icon = document.createElement('span');
+      this.#icon.dataset.motionIcon = '';
+      this.#icon.className = 'icon';
+      this.#icon.slot = 'icon';
+      this.#icon.setAttribute('aria-hidden', 'true');
+      this.append(this.#icon);
+    }
+    this.#label = this.querySelector('[data-motion-label]');
+    if (!this.#label) {
+      this.#label = document.createElement('span');
+      this.#label.dataset.motionLabel = '';
+      this.#label.className = 'label';
+      this.#label.slot = 'label';
+      this.append(this.#label);
+    }
   }
 
-  #setSize(property, value) {
-    if (!value) {
-      this.#button.style.removeProperty(property);
+  #syncTargetState() {
+    if (!this.#button) return;
+    const state = this.#currentState();
+    const spec = this.#currentSpec();
+    this.#button.style.setProperty('--motion-bg', state.backgroundColor);
+    this.#button.style.setProperty('--motion-fg', state.contentColor);
+    this.#button.style.setProperty('--motion-outline-color', state.outlineColor);
+    this.#button.style.setProperty('--motion-color-duration', `${spec.color.duration}ms`);
+    this.#button.style.setProperty('--motion-color-easing', spec.color.easing);
+    this.#button.style.setProperty('--motion-symbol-duration', `${spec.symbol.duration}ms`);
+    this.#button.style.setProperty('--motion-symbol-easing', spec.symbol.easing);
+    this.#button.style.setProperty('--motion-font-round', String(state.fontAxes.round));
+    this.#button.style.setProperty('--motion-symbol-fill', String(state.symbolAxes.fill));
+
+    this.#targets = {
+      cornerRadius: state.cornerRadius,
+      outlineWidth: state.outlineWidth,
+      fontWeight: state.fontAxes.weight,
+      fontWidth: state.fontAxes.width,
+      symbolWeight: state.symbolAxes.weight,
+      symbolGrad: state.symbolAxes.grad,
+      symbolOpsz: state.symbolAxes.opsz,
+    };
+
+    if (!this.#initialized || this.#prefersReducedMotion() || this.motionLevel === 'none') {
+      this.#values = { ...this.#targets };
+      this.#velocities = Object.fromEntries(Object.keys(this.#targets).map(key => [key, 0]));
+      this.#initialized = true;
+      this.#renderNumericState();
       return;
     }
-    const normalized = /^-?\d+(\.\d+)?$/.test(value) ? `${value}px` : value;
-    this.#button.style.setProperty(property, normalized);
+
+    if (!this.#frame) {
+      this.#lastFrameTime = performance.now();
+      this.#frame = requestAnimationFrame(time => this.#animate(time));
+    }
   }
 
-  #applyMotionSpec() {
-    const level = this.motionLevel in motionSpecs ? this.motionLevel : 'medium';
-    const spec = motionSpecs[level];
-    const shape = springTiming(spec.shape);
-    const font = springTiming(spec.font);
-    this.#button.style.setProperty('--motion-shape-duration', shape.duration);
-    this.#button.style.setProperty('--motion-shape-easing', shape.easing);
-    this.#button.style.setProperty('--motion-font-duration', font.duration);
-    this.#button.style.setProperty('--motion-font-easing', font.easing);
-    this.#button.style.setProperty('--motion-color-duration', `${spec.colorDuration}ms`);
-    this.#button.style.setProperty('--motion-symbol-duration', `${spec.symbolDuration}ms`);
+  #animate(time) {
+    const elapsed = Math.min((time - this.#lastFrameTime) / 1000, 1 / 20);
+    this.#lastFrameTime = time;
+    const spec = this.#currentSpec();
+    let moving = false;
+
+    for (const key of Object.keys(this.#targets)) {
+      const spring = key === 'cornerRadius' || key === 'outlineWidth' ? spec.corner : spec.font;
+      const next = stepSpring(this.#values[key], this.#velocities[key], this.#targets[key], elapsed, spring);
+      this.#values[key] = next.value;
+      this.#velocities[key] = next.velocity;
+      if (!next.finished) moving = true;
+    }
+
+    this.#renderNumericState();
+    if (moving) {
+      this.#frame = requestAnimationFrame(nextTime => this.#animate(nextTime));
+    } else {
+      this.#frame = null;
+    }
+  }
+
+  #renderNumericState() {
+    if (!this.#initialized) return;
+    const radiusPercent = Math.min(100, Math.max(0, Math.round(this.#values.cornerRadius)));
+    const radiusPx = Math.min(this.#button.clientWidth, this.#button.clientHeight) * radiusPercent / 100;
+    this.#button.style.setProperty('--motion-radius', `${radiusPx}px`);
+    this.#button.style.setProperty('--motion-outline-width', `${Math.max(0, this.#values.outlineWidth)}px`);
+    this.#button.style.setProperty('--motion-font-weight', String(Math.round(this.#values.fontWeight)));
+    this.#button.style.setProperty('--motion-font-width', String(this.#values.fontWidth));
+    this.#button.style.setProperty('--motion-symbol-weight', String(Math.round(this.#values.symbolWeight)));
+    this.#button.style.setProperty('--motion-symbol-grad', String(this.#values.symbolGrad));
+    this.#button.style.setProperty('--motion-symbol-opsz', String(this.#values.symbolOpsz));
+  }
+
+  #currentState() {
+    if (this.selected) return this.#visuallyPressed ? this.#resolveSelectedPressed() : this.#resolveSelected();
+    return this.#visuallyPressed ? this.#resolveDefaultPressed() : this.#resolveDefault();
+  }
+
+  #resolveDefault() {
+    return mergeState({
+      backgroundColor: 'var(--motion-button-background, var(--mat-sys-primary, #65558f))',
+      contentColor: 'var(--motion-button-color, var(--mat-sys-on-primary, #fff))',
+      cornerRadius: 50,
+      fontAxes: fontAxes.default(),
+      symbolAxes: symbolAxes.default(),
+      haptic: 'toggle-on',
+      outlineWidth: 0,
+      outlineColor: 'var(--motion-button-outline-color, transparent)',
+    }, this.#defaultState);
+  }
+
+  #resolveDefaultPressed() {
+    const base = this.#resolveDefault();
+    return mergeState({
+      ...base,
+      cornerRadius: base.cornerRadius * 0.6,
+      fontAxes: fontAxes.defaultPressed(this.motionLevel),
+      symbolAxes: symbolAxes.defaultPressed(this.motionLevel),
+      haptic: 'long-press',
+    }, this.#defaultPressedState);
+  }
+
+  #resolveSelected() {
+    return mergeState({
+      backgroundColor: 'var(--motion-button-selected-background, var(--mat-sys-secondary, #625b71))',
+      contentColor: 'var(--motion-button-selected-color, var(--mat-sys-on-secondary, #fff))',
+      cornerRadius: 25,
+      fontAxes: fontAxes.selected(),
+      symbolAxes: symbolAxes.selected(this.motionLevel),
+      haptic: 'long-press',
+      outlineWidth: 0,
+      outlineColor: 'var(--motion-button-selected-outline-color, transparent)',
+    }, this.#selectedState);
+  }
+
+  #resolveSelectedPressed() {
+    const base = this.#resolveSelected();
+    return mergeState({
+      ...base,
+      cornerRadius: base.cornerRadius * 1.6,
+      fontAxes: fontAxes.selectedPressed(this.motionLevel),
+      symbolAxes: symbolAxes.selectedPressed(this.motionLevel),
+      haptic: 'toggle-off',
+    }, this.#selectedPressedState);
+  }
+
+  #currentSpec() {
+    return this.#motionSpec ?? motionSpecs[this.motionLevel] ?? motionSpecs.medium;
   }
 
   #onPointerDown(event) {
@@ -283,10 +491,11 @@ export class MotionButton extends HTMLElement {
 
   #beginPress(x, y, bounds) {
     this.#endPress();
-    this.#performHaptic('toggle-on');
+    this.#performHaptic(this.#resolveDefault().haptic);
     this.#pressTimer = setTimeout(() => {
+      this.#visuallyPressed = true;
       this.toggleAttribute('pressed', true);
-      this.#applyPressedSymbolState();
+      this.#syncTargetState();
       this.#pressTimer = null;
     }, 100);
 
@@ -304,63 +513,88 @@ export class MotionButton extends HTMLElement {
   #endPress() {
     clearTimeout(this.#pressTimer);
     this.#pressTimer = null;
+    if (!this.#visuallyPressed) return;
+    this.#visuallyPressed = false;
     this.toggleAttribute('pressed', false);
-    this.#applyRestingSymbolState();
+    this.#syncTargetState();
   }
 
-  #applyPressedSymbolState() {
-    const high = this.motionLevel === 'high';
-    const low = this.motionLevel === 'low' || this.motionLevel === 'none';
-    if (this.selected) {
-      this.style.setProperty('--motion-symbol-weight', this.motionLevel === 'none' ? '700' : low ? '600' : high ? '200' : '300');
-      this.style.setProperty('--motion-symbol-fill', '1');
-      this.style.setProperty('--motion-symbol-grad', low ? '100' : high ? '-30' : '0');
-      this.style.setProperty('--motion-symbol-opsz', low ? '12' : high ? '16' : '20');
+  #performHaptic(haptic) {
+    if (this.getAttribute('haptics-enabled') === 'false' || !haptic || !('vibrate' in navigator)) return;
+    const pattern = haptic === 'toggle-on' ? 10 : haptic === 'toggle-off' ? [8, 24, 8] : 18;
+    navigator.vibrate(pattern);
+  }
+
+  #prefersReducedMotion() {
+    return matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  #setStringAttribute(name, value) {
+    if (value === null || value === undefined || value === '') this.removeAttribute(name);
+    else this.setAttribute(name, String(value));
+  }
+
+  #setSize(property, value) {
+    if (!value) {
+      this.#button.style.removeProperty(property);
       return;
     }
-    this.style.setProperty('--motion-symbol-weight', low ? '400' : high ? '200' : '300');
-    this.style.setProperty('--motion-symbol-fill', '0');
-    this.style.setProperty('--motion-symbol-grad', low ? '100' : high ? '50' : '70');
-    this.style.setProperty('--motion-symbol-opsz', low ? '24' : high ? '30' : '10');
-  }
-
-  #applyRestingSymbolState() {
-    this.style.setProperty('--motion-symbol-weight', this.selected ? '500' : '400');
-    this.style.setProperty('--motion-symbol-fill', this.selected ? '1' : '0');
-    this.style.setProperty('--motion-symbol-grad', '100');
-    this.style.setProperty('--motion-symbol-opsz', '24');
-  }
-
-  #performHaptic(pattern) {
-    if (this.getAttribute('haptics-enabled') === 'false' || !('vibrate' in navigator)) return;
-    navigator.vibrate(pattern === 'toggle-on' ? 10 : 18);
+    const normalized = /^-?\d+(\.\d+)?$/.test(value) ? `${value}px` : value;
+    this.#button.style.setProperty(property, normalized);
   }
 }
 
-function springTiming(spec) {
-  if (spec.type === 'snap') return { duration: '0ms', easing: 'linear' };
-  const dampingRatio = Math.max(0.01, spec.dampingRatio);
-  const naturalFrequency = Math.sqrt(Math.max(0.01, spec.stiffness));
-  const threshold = 0.01;
-  const durationSeconds = dampingRatio < 1
-    ? -Math.log(threshold * Math.sqrt(1 - dampingRatio * dampingRatio)) / (dampingRatio * naturalFrequency)
-    : -Math.log(threshold * 0.1) / naturalFrequency;
-  const sampleCount = 48;
-  const values = Array.from({ length: sampleCount + 1 }, (_, index) => {
-    if (index === sampleCount) return '1';
-    return springPosition(durationSeconds * index / sampleCount, dampingRatio, naturalFrequency).toFixed(4);
-  });
-  return { duration: `${Math.round(durationSeconds * 1000)}ms`, easing: `linear(${values.join(',')})` };
+function mergeState(base, state = {}) {
+  return {
+    backgroundColor: state.backgroundColor ?? base.backgroundColor,
+    contentColor: state.contentColor ?? base.contentColor,
+    cornerRadius: state.cornerRadius ?? base.cornerRadius,
+    fontAxes: { ...base.fontAxes, ...state.fontAxes },
+    symbolAxes: { ...base.symbolAxes, ...state.symbolAxes },
+    haptic: state.haptic === undefined ? base.haptic : state.haptic,
+    outlineWidth: state.outlineWidth ?? base.outlineWidth,
+    outlineColor: state.outlineColor ?? base.outlineColor,
+  };
 }
 
-function springPosition(time, dampingRatio, naturalFrequency) {
-  if (dampingRatio < 1) {
-    const dampedFrequency = naturalFrequency * Math.sqrt(1 - dampingRatio * dampingRatio);
-    const envelope = Math.exp(-dampingRatio * naturalFrequency * time);
-    const phase = dampingRatio / Math.sqrt(1 - dampingRatio * dampingRatio);
-    return 1 - envelope * (Math.cos(dampedFrequency * time) + phase * Math.sin(dampedFrequency * time));
+function stepSpring(value, velocity, target, elapsed, spec) {
+  if (spec.type === 'snap' || elapsed <= 0) return { value: target, velocity: 0, finished: true };
+  const omega = Math.sqrt(Math.max(0.01, spec.stiffness));
+  const damping = Math.max(0.01, spec.dampingRatio);
+  const displacement = value - target;
+  let nextDisplacement;
+  let nextVelocity;
+
+  if (damping < 1) {
+    const decay = damping * omega;
+    const frequency = omega * Math.sqrt(1 - damping * damping);
+    const a = displacement;
+    const b = (velocity + decay * displacement) / frequency;
+    const envelope = Math.exp(-decay * elapsed);
+    const cosine = Math.cos(frequency * elapsed);
+    const sine = Math.sin(frequency * elapsed);
+    const wave = a * cosine + b * sine;
+    nextDisplacement = envelope * wave;
+    nextVelocity = envelope * (-decay * wave - a * frequency * sine + b * frequency * cosine);
+  } else if (damping === 1) {
+    const b = velocity + omega * displacement;
+    const envelope = Math.exp(-omega * elapsed);
+    nextDisplacement = envelope * (displacement + b * elapsed);
+    nextVelocity = envelope * (velocity - omega * b * elapsed);
+  } else {
+    const root = Math.sqrt(damping * damping - 1);
+    const slow = -omega * (damping - root);
+    const fast = -omega * (damping + root);
+    const slowAmount = (velocity - fast * displacement) / (slow - fast);
+    const fastAmount = displacement - slowAmount;
+    nextDisplacement = slowAmount * Math.exp(slow * elapsed) + fastAmount * Math.exp(fast * elapsed);
+    nextVelocity = slow * slowAmount * Math.exp(slow * elapsed) + fast * fastAmount * Math.exp(fast * elapsed);
   }
-  return 1 - Math.exp(-naturalFrequency * time) * (1 + naturalFrequency * time);
+
+  const finished = Math.abs(nextDisplacement) < 0.01 && Math.abs(nextVelocity) < 0.01;
+  return finished
+    ? { value: target, velocity: 0, finished: true }
+    : { value: target + nextDisplacement, velocity: nextVelocity, finished: false };
 }
 
 if (!customElements.get('motion-button')) {

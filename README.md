@@ -1,6 +1,6 @@
 # motion-web
 
-Framework-independent expressive motion controls built as native Web Components.
+Framework-independent expressive motion controls built as native Web Components and ported from the Android Motion button.
 
 ## Install
 
@@ -8,28 +8,24 @@ Framework-independent expressive motion controls built as native Web Components.
 npm install github:ofercraft/motion-web
 ```
 
-Import the component once, then use it in any framework or plain HTML:
-
 ```js
 import 'motion-web/motion-button';
 ```
 
 ```html
-<motion-button icon="play_arrow" aria-label="Play" width="76" height="52"></motion-button>
+<motion-button icon="play_arrow" aria-label="Play" motion-level="medium" width="76" height="52"></motion-button>
 ```
 
-The component supports `icon`, `label`, `selected`, `disabled`, `vertical`,
-`motion-level`, `width`, `height`, `icon-size`, `content-padding`, and
-`content-gap`. It uses an internal native `<button>`, so clicks, keyboard focus,
-and assistive-technology semantics work normally.
+The button is controlled: set `selected` for its selected state. It reproduces Android's four resolved states, 100 ms delayed press response, corner and outline springs, variable Google Sans text axes, and variable Material Symbol axes.
 
-Theme it with CSS custom properties:
-
-```css
-motion-button {
-  --motion-button-background: #f8f9ff;
-  --motion-button-color: #101114;
-  --motion-button-radius: 999px;
-  --motion-button-pressed-radius: 18px;
-}
+```js
+const button = document.querySelector('motion-button');
+button.selected = true;
+button.selectedState = {
+  backgroundColor: '#fff',
+  contentColor: '#101114',
+  fontAxes: { width: 110 },
+};
 ```
+
+Theme colors can also be supplied with `--motion-button-background`, `--motion-button-color`, `--motion-button-selected-background`, and `--motion-button-selected-color`.
