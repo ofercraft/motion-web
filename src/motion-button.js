@@ -230,7 +230,9 @@ export class MotionButton extends HTMLElement {
     this.#button.disabled = this.disabled;
     this.#button.setAttribute('aria-label', this.getAttribute('aria-label') || label || icon);
     this.#button.setAttribute('aria-pressed', String(this.selected));
-    this.#applyRestingSymbolState();
+    this.hasAttribute('pressed')
+      ? this.#applyPressedSymbolState()
+      : this.#applyRestingSymbolState();
 
     this.#setSize('--motion-button-width', this.getAttribute('width'));
     this.#setSize('--motion-button-height', this.getAttribute('height'));
