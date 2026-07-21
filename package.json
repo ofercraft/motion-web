@@ -1,0 +1,33 @@
+{
+  "name": "motion-web",
+  "version": "0.1.0",
+  "description": "Framework-independent expressive motion buttons as native Web Components.",
+  "type": "module",
+  "sideEffects": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./motion-button": {
+      "types": "./src/motion-button.d.ts",
+      "import": "./src/motion-button.js"
+    }
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "web-components",
+    "custom-elements",
+    "material-design",
+    "motion"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofercraft/motion-web.git"
+  }
+}
