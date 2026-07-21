@@ -311,7 +311,15 @@ export class MotionButton extends HTMLElement {
   #applyPressedSymbolState() {
     const high = this.motionLevel === 'high';
     const low = this.motionLevel === 'low' || this.motionLevel === 'none';
+    if (this.selected) {
+      this.style.setProperty('--motion-symbol-weight', this.motionLevel === 'none' ? '700' : low ? '600' : high ? '200' : '300');
+      this.style.setProperty('--motion-symbol-fill', '1');
+      this.style.setProperty('--motion-symbol-grad', low ? '100' : high ? '-30' : '0');
+      this.style.setProperty('--motion-symbol-opsz', low ? '12' : high ? '16' : '20');
+      return;
+    }
     this.style.setProperty('--motion-symbol-weight', low ? '400' : high ? '200' : '300');
+    this.style.setProperty('--motion-symbol-fill', '0');
     this.style.setProperty('--motion-symbol-grad', low ? '100' : high ? '50' : '70');
     this.style.setProperty('--motion-symbol-opsz', low ? '24' : high ? '30' : '10');
   }
