@@ -37,7 +37,7 @@ const motionSpecs = {
   },
   low: {
     corner: { type: 'spring', dampingRatio: 0.35, stiffness: 450 },
-    font: { type: 'spring', dampingRatio: 0.35, stiffness: 450 },
+    font: { type: 'spring', dampingRatio: 0.2, stiffness: 450 },
     color: { duration: 90, easing: 'linear' },
     symbol: { duration: 100, easing: 'cubic-bezier(0, 0, .2, 1)' },
   },
@@ -184,7 +184,7 @@ const fontAxes = {
     : level === 'medium'
       ? { weight: 550, width: 110, round: 200 }
       : level === 'low'
-        ? { weight: 550, width: 100, round: 200 }
+        ? { weight: 500, width: 100, round: 200 }
         : { weight: 600, width: 100, round: 200 },
   selected: level => ({ weight: 600, width: level === 'low' ? 100 : 110, round: 200 }),
   selectedPressed: level => level === 'high'
@@ -192,7 +192,7 @@ const fontAxes = {
     : level === 'medium'
       ? { weight: 550, width: 90, round: 200 }
       : level === 'low'
-        ? { weight: 550, width: 100, round: 200 }
+        ? { weight: 500, width: 100, round: 200 }
         : { weight: 600, width: 110, round: 200 },
 };
 
@@ -203,7 +203,7 @@ const symbolAxes = {
     : level === 'medium'
       ? { weight: 300, fill: 0, grad: 70, opsz: 10 }
       : level === 'low'
-        ? { weight: 600, fill: 0, grad: 60, opsz: 16 }
+        ? { weight: 700, fill: 0, grad: 40, opsz: 12 }
         : { weight: 400, fill: 0, grad: 100, opsz: 24 },
   selected: level => level === 'none'
     ? { weight: 700, fill: 1, grad: 100, opsz: 24 }
@@ -215,7 +215,7 @@ const symbolAxes = {
     : level === 'medium'
       ? { weight: 300, fill: 1, grad: 0, opsz: 20 }
       : level === 'low'
-        ? { weight: 400, fill: 1, grad: 40, opsz: 22 }
+        ? { weight: 300, fill: 1, grad: 20, opsz: 24 }
         : { weight: 700, fill: 1, grad: 100, opsz: 24 },
 };
 

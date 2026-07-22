@@ -7,6 +7,11 @@ const styles = `
     vertical-align: middle;
   }
 
+  :host([motion-level="low"]) {
+    --motion-split-corner-duration: 440ms;
+    --motion-split-corner-easing: linear(0, 1.22 36%, .9 57%, 1.06 74%, .98 88%, 1);
+  }
+
   .split {
     display: inline-flex;
     align-items: stretch;
@@ -35,10 +40,10 @@ const styles = `
       background-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
       color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
       border-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
-      border-start-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-start-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-end-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
+      border-start-start-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
+      border-start-end-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
+      border-end-start-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
+      border-end-end-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1));
   }
 
   motion-button[data-pressed],
@@ -50,6 +55,12 @@ const styles = `
   .primary {
     --motion-button-min-width: var(--motion-split-primary-min-width, 58px);
     --motion-button-padding: var(--motion-split-primary-padding, 0 15px);
+  }
+
+  .primary > [data-motion-label] {
+    flex-shrink: 0;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   .secondary {
@@ -89,7 +100,7 @@ const styles = `
 
   :host([selected]) motion-button[data-pressed],
   :host([selected]) motion-button[pressed] {
-    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, var(--motion-split-full-radius));
+    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, var(--motion-split-inner-radius, 6px));
   }
 `;
 
