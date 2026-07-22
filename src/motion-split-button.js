@@ -11,53 +11,81 @@ const styles = `
     display: inline-flex;
     align-items: stretch;
     gap: var(--motion-split-gap, 2px);
+    width: var(--motion-split-width, auto);
     max-width: 100%;
+  }
+
+  .split[data-ratio] {
+    width: var(--motion-split-width, 160px);
   }
 
   motion-button {
     --motion-button-height: var(--motion-split-height, 40px);
     --motion-button-font-size: var(--motion-split-font-size, 14px);
     --motion-button-icon-size: var(--motion-split-icon-size, 20px);
+    --motion-button-content-gap: var(--motion-split-content-gap, 6px);
+    --motion-split-current-inner-radius: var(--motion-split-inner-radius, 6px);
+    --motion-split-current-outer-radius: var(--motion-split-outer-radius, 20px);
+  }
+
+  motion-button::part(button) {
+    transition:
+      background-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
+      color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
+      border-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
+      border-start-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
+      border-start-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
+      border-end-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
+      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
+  }
+
+  motion-button[data-pressed] {
+    --motion-split-current-inner-radius: var(--motion-split-pressed-inner-radius, 14px);
+    --motion-split-current-outer-radius: var(--motion-split-pressed-outer-radius, 16px);
   }
 
   .primary {
-    --motion-button-min-width: 58px;
+    --motion-button-min-width: var(--motion-split-primary-min-width, 58px);
+    --motion-button-padding: var(--motion-split-primary-padding, 0 15px);
   }
 
   .secondary {
-    --motion-button-min-width: var(--motion-split-secondary-width, 42px);
+    --motion-button-width: var(--motion-split-secondary-width, 42px);
+    --motion-button-min-width: var(--motion-split-secondary-min-width, 0px);
+    --motion-button-padding: var(--motion-split-secondary-padding, 0);
+  }
+
+  .split[data-width]:not([data-ratio]) .primary {
+    --motion-button-width: 100%;
+    flex: 1 1 auto;
+  }
+
+  .split[data-ratio] motion-button {
+    --motion-button-width: 100%;
+    --motion-button-min-width: 0px;
+    min-width: 0;
   }
 
   .primary::part(button) {
-    border-radius:
-      var(--motion-split-outer-radius, 20px)
-      var(--motion-split-inner-radius, 6px)
-      var(--motion-split-inner-radius, 6px)
-      var(--motion-split-outer-radius, 20px);
+    border-start-start-radius: var(--motion-split-current-outer-radius);
+    border-end-start-radius: var(--motion-split-current-outer-radius);
+    border-start-end-radius: var(--motion-split-current-inner-radius);
+    border-end-end-radius: var(--motion-split-current-inner-radius);
   }
 
   .secondary::part(button) {
-    border-radius:
-      var(--motion-split-inner-radius, 6px)
-      var(--motion-split-outer-radius, 20px)
-      var(--motion-split-outer-radius, 20px)
-      var(--motion-split-inner-radius, 6px);
+    border-start-start-radius: var(--motion-split-current-inner-radius);
+    border-end-start-radius: var(--motion-split-current-inner-radius);
+    border-start-end-radius: var(--motion-split-current-outer-radius);
+    border-end-end-radius: var(--motion-split-current-outer-radius);
   }
 
-  :host([dir='rtl']) .primary::part(button) {
-    border-radius:
-      var(--motion-split-inner-radius, 6px)
-      var(--motion-split-outer-radius, 20px)
-      var(--motion-split-outer-radius, 20px)
-      var(--motion-split-inner-radius, 6px);
+  .primary[selected] {
+    --motion-split-current-inner-radius: var(--motion-split-selected-inner-radius, 12px);
   }
 
-  :host([dir='rtl']) .secondary::part(button) {
-    border-radius:
-      var(--motion-split-outer-radius, 20px)
-      var(--motion-split-inner-radius, 6px)
-      var(--motion-split-inner-radius, 6px)
-      var(--motion-split-outer-radius, 20px);
+  .primary[selected][data-pressed] {
+    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, 16px);
   }
 `;
 
@@ -79,8 +107,12 @@ export class MotionSplitButton extends HTMLElement {
   static observedAttributes = [
     'label', 'icon', 'menu-icon', 'aria-label', 'menu-aria-label',
     'selected', 'disabled', 'motion-level', 'haptics-enabled',
+    'width', 'height', 'font-size', 'icon-size', 'gap', 'content-gap',
+    'primary-width', 'secondary-width', 'primary-padding', 'secondary-padding',
+    'primary-ratio', 'secondary-ratio',
   ];
 
+  #split;
   #primary;
   #secondary;
 
@@ -94,8 +126,24 @@ export class MotionSplitButton extends HTMLElement {
         <motion-button class="secondary"></motion-button>
       </div>
     `;
+    this.#split = root.querySelector('.split');
     this.#primary = root.querySelector('.primary');
     this.#secondary = root.querySelector('.secondary');
+
+    for (const button of [this.#primary, this.#secondary]) {
+      const startPress = event => {
+        if (this.disabled || event.repeat) return;
+        if (event.type !== 'keydown' || event.key === ' ' || event.key === 'Enter') {
+          button.setAttribute('data-pressed', '');
+        }
+      };
+      const endPress = () => button.removeAttribute('data-pressed');
+      button.addEventListener('pointerdown', startPress);
+      button.addEventListener('keydown', startPress);
+      for (const eventName of ['pointerup', 'pointercancel', 'pointerleave', 'keyup', 'blur']) {
+        button.addEventListener(eventName, endPress);
+      }
+    }
 
     this.#primary.addEventListener('click', event => {
       event.stopPropagation();
@@ -135,6 +183,30 @@ export class MotionSplitButton extends HTMLElement {
   set disabled(value) { this.toggleAttribute('disabled', Boolean(value)); }
   get motionLevel() { return this.getAttribute('motion-level') ?? 'low'; }
   set motionLevel(value) { this.#setStringAttribute('motion-level', value); }
+  get width() { return this.getAttribute('width') ?? ''; }
+  set width(value) { this.#setStringAttribute('width', value); }
+  get height() { return this.getAttribute('height') ?? ''; }
+  set height(value) { this.#setStringAttribute('height', value); }
+  get fontSize() { return this.getAttribute('font-size') ?? ''; }
+  set fontSize(value) { this.#setStringAttribute('font-size', value); }
+  get iconSize() { return this.getAttribute('icon-size') ?? ''; }
+  set iconSize(value) { this.#setStringAttribute('icon-size', value); }
+  get gap() { return this.getAttribute('gap') ?? ''; }
+  set gap(value) { this.#setStringAttribute('gap', value); }
+  get contentGap() { return this.getAttribute('content-gap') ?? ''; }
+  set contentGap(value) { this.#setStringAttribute('content-gap', value); }
+  get primaryWidth() { return this.getAttribute('primary-width') ?? ''; }
+  set primaryWidth(value) { this.#setStringAttribute('primary-width', value); }
+  get secondaryWidth() { return this.getAttribute('secondary-width') ?? ''; }
+  set secondaryWidth(value) { this.#setStringAttribute('secondary-width', value); }
+  get primaryPadding() { return this.getAttribute('primary-padding') ?? ''; }
+  set primaryPadding(value) { this.#setStringAttribute('primary-padding', value); }
+  get secondaryPadding() { return this.getAttribute('secondary-padding') ?? ''; }
+  set secondaryPadding(value) { this.#setStringAttribute('secondary-padding', value); }
+  get primaryRatio() { return Number(this.getAttribute('primary-ratio') ?? 1); }
+  set primaryRatio(value) { this.#setStringAttribute('primary-ratio', value); }
+  get secondaryRatio() { return Number(this.getAttribute('secondary-ratio') ?? 1); }
+  set secondaryRatio(value) { this.#setStringAttribute('secondary-ratio', value); }
 
   #sync() {
     if (!this.#primary || !this.#secondary) return;
@@ -146,11 +218,11 @@ export class MotionSplitButton extends HTMLElement {
     this.#primary.motionLevel = this.motionLevel;
     this.#primary.defaultState = defaultState;
     this.#primary.selectedState = selectedState;
-    this.#primary.setAttribute('height', '40');
-    this.#primary.setAttribute('font-size', '14');
-    this.#primary.setAttribute('icon-size', '20');
-    this.#primary.setAttribute('content-padding', '0 15px');
-    this.#primary.setAttribute('content-gap', '6');
+    this.#syncAttribute(this.#primary, 'height', 'height');
+    this.#syncAttribute(this.#primary, 'font-size', 'font-size');
+    this.#syncAttribute(this.#primary, 'icon-size', 'icon-size');
+    this.#syncAttribute(this.#primary, 'content-padding', 'primary-padding');
+    this.#syncAttribute(this.#primary, 'content-gap', 'content-gap');
     this.#primary.setAttribute(
       'aria-label',
       this.getAttribute('aria-label') || this.label || this.icon || 'Primary action',
@@ -161,14 +233,34 @@ export class MotionSplitButton extends HTMLElement {
     this.#secondary.motionLevel = this.motionLevel;
     this.#secondary.defaultState = defaultState;
     this.#secondary.selectedState = selectedState;
-    this.#secondary.setAttribute('width', '42');
-    this.#secondary.setAttribute('height', '40');
-    this.#secondary.setAttribute('icon-size', '20');
-    this.#secondary.setAttribute('content-padding', '0');
+    this.#syncAttribute(this.#secondary, 'height', 'height');
+    this.#syncAttribute(this.#secondary, 'font-size', 'font-size');
+    this.#syncAttribute(this.#secondary, 'icon-size', 'icon-size');
+    this.#syncAttribute(this.#secondary, 'content-padding', 'secondary-padding');
+    this.#syncAttribute(this.#secondary, 'content-gap', 'content-gap');
     this.#secondary.setAttribute(
       'aria-label',
       this.getAttribute('menu-aria-label') || `More ${this.label || 'actions'}`,
     );
+
+    const hasRatio = this.hasAttribute('primary-ratio') || this.hasAttribute('secondary-ratio');
+    this.#split.toggleAttribute('data-ratio', hasRatio);
+    this.#split.toggleAttribute('data-width', this.hasAttribute('width'));
+    this.#setSizeProperty(this, 'width', this.getAttribute('width'));
+    this.#setSizeProperty(this, '--motion-split-width', this.getAttribute('width'));
+    this.#setSizeProperty(this.#split, '--motion-split-gap', this.getAttribute('gap'));
+
+    if (hasRatio) {
+      this.#primary.removeAttribute('width');
+      this.#secondary.removeAttribute('width');
+      this.#primary.style.flex = `${this.#ratio('primary-ratio')} 1 0px`;
+      this.#secondary.style.flex = `${this.#ratio('secondary-ratio')} 1 0px`;
+    } else {
+      this.#primary.style.removeProperty('flex');
+      this.#secondary.style.removeProperty('flex');
+      this.#syncAttribute(this.#primary, 'width', 'primary-width');
+      this.#syncAttribute(this.#secondary, 'width', 'secondary-width');
+    }
 
     const hapticsEnabled = this.getAttribute('haptics-enabled');
     if (hapticsEnabled === null) {
@@ -183,6 +275,26 @@ export class MotionSplitButton extends HTMLElement {
   #setStringAttribute(name, value) {
     if (value === null || value === undefined || value === '') this.removeAttribute(name);
     else this.setAttribute(name, String(value));
+  }
+
+  #syncAttribute(element, targetName, sourceName) {
+    const value = this.getAttribute(sourceName);
+    if (value === null || value === '') element.removeAttribute(targetName);
+    else element.setAttribute(targetName, value);
+  }
+
+  #setSizeProperty(element, property, value) {
+    if (value === null || value === '') {
+      element.style.removeProperty(property);
+      return;
+    }
+    const normalized = /^-?\d*\.?\d+$/.test(value) ? `${value}px` : value;
+    element.style.setProperty(property, normalized);
+  }
+
+  #ratio(attribute) {
+    const value = Number(this.getAttribute(attribute) ?? 1);
+    return Number.isFinite(value) && value > 0 ? value : 1;
   }
 }
 

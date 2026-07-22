@@ -323,7 +323,9 @@ export class MotionButton extends HTMLElement {
     this.#setSize('--motion-button-font-size', this.getAttribute('font-size'));
     this.#setSize('--motion-button-icon-size', this.getAttribute('icon-size'));
     this.#setSize('--motion-button-content-gap', this.getAttribute('content-gap'));
-    this.#button.style.setProperty('--motion-button-padding', this.getAttribute('content-padding') || '0');
+    const contentPadding = this.getAttribute('content-padding');
+    if (contentPadding === null) this.#button.style.removeProperty('--motion-button-padding');
+    else this.#button.style.setProperty('--motion-button-padding', contentPadding);
     this.#syncTargetState();
   }
 

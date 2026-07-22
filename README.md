@@ -53,6 +53,40 @@ splitButton.addEventListener('primary-action', () => createItem());
 splitButton.addEventListener('secondary-action', () => openMenu());
 ```
 
+Size either segment independently:
+
+```html
+<motion-split-button
+  label="Wide action"
+  icon="add_circle"
+  height="48"
+  font-size="16"
+  icon-size="24"
+  primary-width="150"
+  secondary-width="56"
+  gap="3"
+></motion-split-button>
+```
+
+Use a total width with ratios when both segments should share the available space proportionally. Ratios take precedence over individual segment widths.
+
+```html
+<motion-split-button
+  label="Button"
+  icon="add_circle"
+  width="240"
+  primary-ratio="2"
+  secondary-ratio="1"
+  dir="rtl"
+></motion-split-button>
+```
+
+`dir="ltr"`, `dir="rtl"`, and inherited page direction are supported. The primary and secondary segments, their corner geometry, and their proportions follow the active writing direction automatically. In the default LTR layout, `secondary-width` controls the right segment.
+
+The equivalent CSS variables are `--motion-split-width`, `--motion-split-height`, `--motion-split-font-size`, `--motion-split-icon-size`, `--motion-split-gap`, `--motion-split-content-gap`, `--motion-split-primary-padding`, `--motion-split-secondary-padding`, `--motion-split-primary-min-width`, and `--motion-split-secondary-min-width`.
+
+Corner motion can be tuned with `--motion-split-inner-radius`, `--motion-split-selected-inner-radius`, `--motion-split-pressed-inner-radius`, `--motion-split-pressed-outer-radius`, and `--motion-split-corner-duration`.
+
 ## Feldman Font
 
 Motion Web bundles Feldman Font, an OFL-licensed modified typeface based on Google Sans Flex and Fredoka. Characters supported by Google Sans Flex retain their original outlines and variable behavior. Characters missing from Google Sans Flex, including Hebrew, come from Fredoka.

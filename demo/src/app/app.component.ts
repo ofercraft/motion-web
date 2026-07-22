@@ -22,6 +22,7 @@ type MotionLevel = 'none' | 'low' | 'medium' | 'high';
 export class AppComponent {
   readonly darkTheme = signal(true);
   readonly motionLevel = signal<MotionLevel>('low');
+  readonly selected = signal(false);
   readonly lastAction = signal('Ready');
 
   setTheme(change: MatSlideToggleChange): void {
@@ -36,5 +37,10 @@ export class AppComponent {
 
   activate(action: 'Primary action' | 'More options'): void {
     this.lastAction.set(action);
+  }
+
+  togglePrimary(): void {
+    this.selected.update(selected => !selected);
+    this.activate('Primary action');
   }
 }

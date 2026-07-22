@@ -40,7 +40,8 @@
           aria-label="Run button action"
           menu-aria-label="Open more button actions"
           [attr.motion-level]="motionLevel()"
-          (primary-action)="activate('Primary action')"
+          [attr.selected]="selected() ? '' : null"
+          (primary-action)="togglePrimary()"
           (secondary-action)="activate('More options')"
         ></motion-split-button>
       </div>
@@ -67,7 +68,7 @@
         <mat-card-title>Built from Motion buttons</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>The primary and menu actions keep independent ripples, keyboard focus, haptics, and motion states. The split control defaults to low motion.</p>
+        <p>The primary and menu actions keep independent sizing, ratios, RTL/LTR layout, ripples, keyboard focus, haptics, and motion states.</p>
       </mat-card-content>
     </mat-card>
 
