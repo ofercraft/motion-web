@@ -1,0 +1,91 @@
+@use '@angular/material' as mat;
+
+@font-face {
+  font-family: 'Motion Feldman Font';
+  src: url('../../src/fonts/feldman_font.ttf') format('truetype');
+  font-weight: 1 1000;
+  font-stretch: 25% 151%;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Motion Material Symbols Rounded';
+  src: url('../../src/fonts/material_symbols_rounded.ttf') format('truetype');
+  font-weight: 100 700;
+  font-style: normal;
+}
+
+@include mat.core();
+
+$light-theme: (
+  color: (
+    theme-type: light,
+    primary: mat.$violet-palette,
+    tertiary: mat.$magenta-palette,
+  ),
+  typography: (
+    plain-family: 'Motion Feldman Font',
+    brand-family: 'Motion Feldman Font',
+    bold-weight: 720,
+    medium-weight: 600,
+    regular-weight: 450,
+  ),
+  density: (scale: 0),
+);
+
+$dark-theme: (
+  color: (
+    theme-type: dark,
+    primary: mat.$violet-palette,
+    tertiary: mat.$magenta-palette,
+  ),
+  typography: (
+    plain-family: 'Motion Feldman Font',
+    brand-family: 'Motion Feldman Font',
+    bold-weight: 720,
+    medium-weight: 600,
+    regular-weight: 450,
+  ),
+  density: (scale: 0),
+);
+
+html.light-theme {
+  @include mat.theme($light-theme);
+  color-scheme: light;
+}
+
+html.dark-theme {
+  @include mat.theme($dark-theme);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--mat-sys-background);
+  font-family: 'Motion Feldman Font';
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: var(--mat-sys-on-background);
+  background: var(--mat-sys-background);
+  font: 450 16px/1.5 'Motion Feldman Font';
+  font-variation-settings: 'wght' 450, 'wdth' 100, 'ROND' 80;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, textarea, select { font: inherit; }
+::selection { color: var(--mat-sys-on-primary); background: var(--mat-sys-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -2,6 +2,8 @@
 
 Framework-independent expressive motion controls built as native Web Components and ported from the Android Motion button.
 
+[Live Angular Material demo](https://ofercraft.github.io/motion-web/)
+
 ## Install
 
 ```sh
@@ -10,6 +12,7 @@ npm install github:ofercraft/motion-web
 
 ```js
 import 'motion-web/motion-button';
+import 'motion-web/motion-split-button';
 ```
 
 ```html
@@ -29,6 +32,26 @@ button.selectedState = {
 ```
 
 Theme colors can also be supplied with `--motion-button-background`, `--motion-button-color`, `--motion-button-selected-background`, and `--motion-button-selected-color`.
+
+## Split button
+
+`motion-split-button` composes two Motion buttons with compact Material 3 split-button geometry. It uses low motion by default and keeps the reference control's 40px height, 14px label, and 20px icons.
+
+```html
+<motion-split-button
+  label="Button"
+  icon="add_circle"
+  menu-icon="expand_more"
+  aria-label="Create item"
+  menu-aria-label="More create options"
+></motion-split-button>
+```
+
+```js
+const splitButton = document.querySelector('motion-split-button');
+splitButton.addEventListener('primary-action', () => createItem());
+splitButton.addEventListener('secondary-action', () => openMenu());
+```
 
 ## Feldman Font
 
