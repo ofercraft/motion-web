@@ -184,15 +184,15 @@ const fontAxes = {
     : level === 'medium'
       ? { weight: 550, width: 110, round: 200 }
       : level === 'low'
-        ? { weight: 550, width: 110, round: 200 }
+        ? { weight: 550, width: 100, round: 200 }
         : { weight: 600, width: 100, round: 200 },
-  selected: () => ({ weight: 600, width: 110, round: 200 }),
+  selected: level => ({ weight: 600, width: level === 'low' ? 100 : 110, round: 200 }),
   selectedPressed: level => level === 'high'
     ? { weight: 500, width: 85, round: 200 }
     : level === 'medium'
       ? { weight: 550, width: 90, round: 200 }
       : level === 'low'
-        ? { weight: 550, width: 90, round: 200 }
+        ? { weight: 550, width: 100, round: 200 }
         : { weight: 600, width: 110, round: 200 },
 };
 
@@ -465,7 +465,7 @@ export class MotionButton extends HTMLElement {
       backgroundColor: 'var(--motion-button-selected-background, var(--mat-sys-secondary, #625b71))',
       contentColor: 'var(--motion-button-selected-color, var(--mat-sys-on-secondary, #fff))',
       cornerRadius: 25,
-      fontAxes: fontAxes.selected(),
+      fontAxes: fontAxes.selected(this.motionLevel),
       symbolAxes: symbolAxes.selected(this.motionLevel),
       haptic: 'long-press',
       outlineWidth: 0,
