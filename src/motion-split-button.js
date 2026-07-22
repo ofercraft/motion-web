@@ -24,8 +24,9 @@ const styles = `
     --motion-button-font-size: var(--motion-split-font-size, 14px);
     --motion-button-icon-size: var(--motion-split-icon-size, 20px);
     --motion-button-content-gap: var(--motion-split-content-gap, 6px);
+    --motion-split-full-radius: 999px;
     --motion-split-current-inner-radius: var(--motion-split-inner-radius, 6px);
-    --motion-split-current-outer-radius: var(--motion-split-outer-radius, 20px);
+    --motion-split-current-outer-radius: var(--motion-split-outer-radius, var(--motion-split-full-radius));
   }
 
   motion-button::part(button) {
@@ -36,12 +37,16 @@ const styles = `
       border-start-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
       border-start-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
       border-end-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
+      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
+      transform var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
   }
 
   motion-button[data-pressed] {
-    --motion-split-current-inner-radius: var(--motion-split-pressed-inner-radius, 14px);
-    --motion-split-current-outer-radius: var(--motion-split-pressed-outer-radius, 16px);
+    --motion-split-current-inner-radius: var(--motion-split-pressed-inner-radius, var(--motion-split-full-radius));
+  }
+
+  motion-button[data-pressed]::part(button) {
+    transform: scale(.96);
   }
 
   .primary {
@@ -80,12 +85,12 @@ const styles = `
     border-end-end-radius: var(--motion-split-current-outer-radius);
   }
 
-  .primary[selected] {
-    --motion-split-current-inner-radius: var(--motion-split-selected-inner-radius, 12px);
+  :host([selected]) motion-button {
+    --motion-split-current-inner-radius: var(--motion-split-selected-inner-radius, var(--motion-split-full-radius));
   }
 
-  .primary[selected][data-pressed] {
-    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, 16px);
+  :host([selected]) motion-button[data-pressed] {
+    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, var(--motion-split-full-radius));
   }
 `;
 

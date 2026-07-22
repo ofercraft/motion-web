@@ -23,6 +23,8 @@ export class AppComponent {
   readonly darkTheme = signal(true);
   readonly motionLevel = signal<MotionLevel>('low');
   readonly selected = signal(false);
+  readonly buttonSelected = signal(false);
+  readonly iconButtonSelected = signal(false);
   readonly lastAction = signal('Ready');
 
   setTheme(change: MatSlideToggleChange): void {
@@ -42,5 +44,13 @@ export class AppComponent {
   togglePrimary(): void {
     this.selected.update(selected => !selected);
     this.activate('Primary action');
+  }
+
+  toggleButton(): void {
+    this.buttonSelected.update(selected => !selected);
+  }
+
+  toggleIconButton(): void {
+    this.iconButtonSelected.update(selected => !selected);
   }
 }

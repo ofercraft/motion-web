@@ -49,6 +49,57 @@
     </div>
   </section>
 
+  <section class="button-demos" aria-labelledby="button-demos-title">
+    <div class="section-heading">
+      <h2 id="button-demos-title">Motion button demos</h2>
+      <p>Click either button to see its selected motion. Both follow the motion level above.</p>
+    </div>
+
+    <mat-card appearance="outlined" class="button-demo-card">
+      <mat-card-header>
+        <mat-card-title>Motion button</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="button-demo-stage">
+          <motion-button
+            label="Continue"
+            icon="arrow_forward"
+            width="176"
+            height="64"
+            font-size="18"
+            icon-size="24"
+            aria-label="Toggle Continue button"
+            [attr.motion-level]="motionLevel()"
+            [attr.selected]="buttonSelected() ? '' : null"
+            (click)="toggleButton()"
+          ></motion-button>
+        </div>
+        <p class="action-status" aria-live="polite">{{ buttonSelected() ? 'Selected' : 'Default' }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="button-demo-card">
+      <mat-card-header>
+        <mat-card-title>Icon Motion button</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="button-demo-stage">
+          <motion-button
+            icon="favorite"
+            width="64"
+            height="64"
+            icon-size="26"
+            aria-label="Toggle favorite"
+            [attr.motion-level]="motionLevel()"
+            [attr.selected]="iconButtonSelected() ? '' : null"
+            (click)="toggleIconButton()"
+          ></motion-button>
+        </div>
+        <p class="action-status" aria-live="polite">{{ iconButtonSelected() ? 'Selected' : 'Default' }}</p>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
   <section class="details" aria-label="Usage details">
     <mat-card appearance="outlined">
       <mat-card-header>
