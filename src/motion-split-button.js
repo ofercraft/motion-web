@@ -37,16 +37,11 @@ const styles = `
       border-start-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
       border-start-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
       border-end-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      transform var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
+      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
   }
 
   motion-button[data-pressed] {
     --motion-split-current-inner-radius: var(--motion-split-pressed-inner-radius, var(--motion-split-full-radius));
-  }
-
-  motion-button[data-pressed]::part(button) {
-    transform: scale(.96);
   }
 
   .primary {
