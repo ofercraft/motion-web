@@ -7,6 +7,10 @@ const styles = `
     vertical-align: middle;
   }
 
+  :host([motion-level="low"]) {
+    --motion-split-default-corner-duration: 160ms;
+  }
+
   .split {
     display: inline-flex;
     align-items: stretch;
@@ -24,9 +28,10 @@ const styles = `
     --motion-button-font-size: var(--motion-split-font-size, 14px);
     --motion-button-icon-size: var(--motion-split-icon-size, 20px);
     --motion-button-content-gap: var(--motion-split-content-gap, 6px);
-    --motion-split-full-radius: 999px;
+    --motion-split-full-radius: calc(var(--motion-split-height, 40px) / 2);
+    --motion-split-resting-outer-radius: calc(var(--motion-split-height, 40px) / 2 - 2px);
     --motion-split-current-inner-radius: var(--motion-split-inner-radius, 6px);
-    --motion-split-current-outer-radius: var(--motion-split-outer-radius, var(--motion-split-full-radius));
+    --motion-split-current-outer-radius: var(--motion-split-outer-radius, var(--motion-split-resting-outer-radius));
   }
 
   motion-button::part(button) {
@@ -34,14 +39,16 @@ const styles = `
       background-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
       color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
       border-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
-      border-start-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-start-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-end-start-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1),
-      border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
+      border-start-start-radius var(--motion-split-corner-duration, var(--motion-split-default-corner-duration, 260ms)) cubic-bezier(.2, 1.35, .35, 1),
+      border-start-end-radius var(--motion-split-corner-duration, var(--motion-split-default-corner-duration, 260ms)) cubic-bezier(.2, 1.35, .35, 1),
+      border-end-start-radius var(--motion-split-corner-duration, var(--motion-split-default-corner-duration, 260ms)) cubic-bezier(.2, 1.35, .35, 1),
+      border-end-end-radius var(--motion-split-corner-duration, var(--motion-split-default-corner-duration, 260ms)) cubic-bezier(.2, 1.35, .35, 1);
   }
 
-  motion-button[data-pressed] {
+  motion-button[data-pressed],
+  motion-button[data-corner-bounce] {
     --motion-split-current-inner-radius: var(--motion-split-pressed-inner-radius, var(--motion-split-full-radius));
+    --motion-split-current-outer-radius: var(--motion-split-pressed-outer-radius, var(--motion-split-full-radius));
   }
 
   .primary {
@@ -143,6 +150,7 @@ export class MotionSplitButton extends HTMLElement {
 
     this.#primary.addEventListener('click', event => {
       event.stopPropagation();
+      this.#bounceCorners(this.#primary);
       this.dispatchEvent(new CustomEvent('primary-action', {
         bubbles: true,
         composed: true,
@@ -151,6 +159,7 @@ export class MotionSplitButton extends HTMLElement {
     });
     this.#secondary.addEventListener('click', event => {
       event.stopPropagation();
+      this.#bounceCorners(this.#secondary);
       this.dispatchEvent(new CustomEvent('secondary-action', {
         bubbles: true,
         composed: true,
@@ -244,6 +253,7 @@ export class MotionSplitButton extends HTMLElement {
     this.#split.toggleAttribute('data-width', this.hasAttribute('width'));
     this.#setSizeProperty(this, 'width', this.getAttribute('width'));
     this.#setSizeProperty(this, '--motion-split-width', this.getAttribute('width'));
+    this.#setSizeProperty(this, '--motion-split-height', this.getAttribute('height'));
     this.#setSizeProperty(this.#split, '--motion-split-gap', this.getAttribute('gap'));
 
     if (hasRatio) {
@@ -291,6 +301,11 @@ export class MotionSplitButton extends HTMLElement {
   #ratio(attribute) {
     const value = Number(this.getAttribute(attribute) ?? 1);
     return Number.isFinite(value) && value > 0 ? value : 1;
+  }
+
+  #bounceCorners(button) {
+    button.setAttribute('data-corner-bounce', '');
+    window.setTimeout(() => button.removeAttribute('data-corner-bounce'), 180);
   }
 }
 
