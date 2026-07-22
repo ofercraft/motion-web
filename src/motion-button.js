@@ -130,7 +130,7 @@ const styles = `
     font-feature-settings: 'liga';
     font-variation-settings:
       'FILL' var(--motion-symbol-fill, 0),
-      'wght' var(--motion-symbol-weight, 700),
+      'wght' var(--motion-symbol-weight, 400),
       'GRAD' var(--motion-symbol-grad, 100),
       'opsz' var(--motion-symbol-opsz, 24);
     -webkit-font-smoothing: antialiased;
@@ -193,12 +193,12 @@ const fontAxes = {
 };
 
 const symbolAxes = {
-  default: () => ({ weight: 700, fill: 0, grad: 100, opsz: 24 }),
+  default: () => ({ weight: 400, fill: 0, grad: 100, opsz: 24 }),
   defaultPressed: level => level === 'high'
-    ? { weight: 500, fill: 0, grad: 50, opsz: 30 }
+    ? { weight: 200, fill: 0, grad: 50, opsz: 30 }
     : level === 'medium'
-      ? { weight: 600, fill: 0, grad: 70, opsz: 10 }
-      : { weight: 700, fill: 0, grad: 100, opsz: 24 },
+      ? { weight: 300, fill: 0, grad: 70, opsz: 10 }
+      : { weight: 400, fill: 0, grad: 100, opsz: 24 },
   selected: level => level === 'none'
     ? { weight: 700, fill: 1, grad: 100, opsz: 24 }
     : level === 'low'
