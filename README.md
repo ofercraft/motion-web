@@ -85,7 +85,7 @@ Use a total width with ratios when both segments should share the available spac
 
 The equivalent CSS variables are `--motion-split-width`, `--motion-split-height`, `--motion-split-font-size`, `--motion-split-icon-size`, `--motion-split-gap`, `--motion-split-content-gap`, `--motion-split-primary-padding`, `--motion-split-secondary-padding`, `--motion-split-primary-min-width`, and `--motion-split-secondary-min-width`.
 
-Corner motion can be tuned with `--motion-split-inner-radius`, `--motion-split-outer-radius`, `--motion-split-selected-inner-radius`, `--motion-split-pressed-inner-radius`, `--motion-split-pressed-outer-radius`, and `--motion-split-corner-duration`.
+Corner motion can be tuned with `--motion-split-inner-radius`, `--motion-split-outer-radius`, `--motion-split-selected-inner-radius`, `--motion-split-pressed-inner-radius`, and `--motion-split-corner-duration`.
 
 ## Feldman Font
 
