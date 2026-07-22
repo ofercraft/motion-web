@@ -97,15 +97,11 @@ const styles = `
 const defaultState = {
   backgroundColor: 'var(--motion-split-background, #d0bcff)',
   contentColor: 'var(--motion-split-color, #21005d)',
-  fontAxes: { weight: 500, width: 100, round: 100 },
-  symbolAxes: { weight: 400, fill: 0, grad: 0, opsz: 20 },
 };
 
 const selectedState = {
   backgroundColor: 'var(--motion-split-selected-background, var(--mat-sys-primary, #6750a4))',
   contentColor: 'var(--motion-split-selected-color, var(--mat-sys-on-primary, #fff))',
-  fontAxes: { weight: 550, width: 102, round: 100 },
-  symbolAxes: { weight: 450, fill: 1, grad: 0, opsz: 20 },
 };
 
 export class MotionSplitButton extends HTMLElement {
