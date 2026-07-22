@@ -115,6 +115,8 @@ export class MotionSplitButton extends HTMLElement {
   #split;
   #primary;
   #secondary;
+  #layoutUnlockTimer = null;
+  #pressObservers = [];
 
   constructor() {
     super();
@@ -129,21 +131,6 @@ export class MotionSplitButton extends HTMLElement {
     this.#split = root.querySelector('.split');
     this.#primary = root.querySelector('.primary');
     this.#secondary = root.querySelector('.secondary');
-
-    for (const button of [this.#primary, this.#secondary]) {
-      const startPress = event => {
-        if (this.disabled || event.repeat) return;
-        if (event.type !== 'keydown' || event.key === ' ' || event.key === 'Enter') {
-          button.setAttribute('data-pressed', '');
-        }
-      };
-      const endPress = () => button.removeAttribute('data-pressed');
-      button.addEventListener('pointerdown', startPress);
-      button.addEventListener('keydown', startPress);
-      for (const eventName of ['pointerup', 'pointercancel', 'pointerleave', 'keyup', 'blur']) {
-        button.addEventListener(eventName, endPress);
-      }
-    }
 
     this.#primary.addEventListener('click', event => {
       event.stopPropagation();
@@ -164,11 +151,50 @@ export class MotionSplitButton extends HTMLElement {
   }
 
   connectedCallback() {
+    this.#observePressState();
     this.#sync();
+  }
+
+  disconnectedCallback() {
+    clearTimeout(this.#layoutUnlockTimer);
+    for (const observer of this.#pressObservers) observer.disconnect();
+    this.#pressObservers = [];
   }
 
   attributeChangedCallback() {
     this.#sync();
+  }
+
+  #observePressState() {
+    if (this.#pressObservers.length) return;
+    for (const button of [this.#primary, this.#secondary]) {
+      const observer = new MutationObserver(() => {
+        if (button.hasAttribute('pressed')) this.#lockLayout();
+        else this.#scheduleLayoutUnlock();
+      });
+      observer.observe(button, { attributes: true, attributeFilter: ['pressed'] });
+      this.#pressObservers.push(observer);
+    }
+  }
+
+  #lockLayout() {
+    clearTimeout(this.#layoutUnlockTimer);
+    const splitWidth = this.#split.getBoundingClientRect().width;
+    const primaryWidth = this.#primary.getBoundingClientRect().width;
+    const secondaryWidth = this.#secondary.getBoundingClientRect().width;
+    this.#split.style.width = `${splitWidth}px`;
+    this.#primary.style.setProperty('--motion-button-width', `${primaryWidth}px`);
+    this.#secondary.style.setProperty('--motion-button-width', `${secondaryWidth}px`);
+  }
+
+  #scheduleLayoutUnlock() {
+    clearTimeout(this.#layoutUnlockTimer);
+    this.#layoutUnlockTimer = setTimeout(() => {
+      this.#split.style.removeProperty('width');
+      this.#primary.style.removeProperty('--motion-button-width');
+      this.#secondary.style.removeProperty('--motion-button-width');
+      this.#layoutUnlockTimer = null;
+    }, 900);
   }
 
   get label() { return this.getAttribute('label') ?? ''; }

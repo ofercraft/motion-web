@@ -36,8 +36,8 @@ const motionSpecs = {
     symbol: { duration: 0, easing: 'linear' },
   },
   low: {
-    corner: { type: 'spring', dampingRatio: 0.55, stiffness: 450 },
-    font: { type: 'spring', dampingRatio: 0.55, stiffness: 450 },
+    corner: { type: 'spring', dampingRatio: 0.8, stiffness: 600 },
+    font: { type: 'spring', dampingRatio: 0.8, stiffness: 600 },
     color: { duration: 90, easing: 'linear' },
     symbol: { duration: 100, easing: 'cubic-bezier(0, 0, .2, 1)' },
   },
@@ -230,7 +230,6 @@ export class MotionButton extends HTMLElement {
   #icon;
   #label;
   #pressTimer = null;
-  #clickPulseTimer = null;
   #rippleTimer = null;
   #frame = null;
   #lastFrameTime = 0;
@@ -268,7 +267,6 @@ export class MotionButton extends HTMLElement {
     this.#button.addEventListener('keyup', event => {
       if (event.key === ' ' || event.key === 'Enter') this.#endPress();
     });
-    this.#button.addEventListener('click', () => this.#pulseLowMotion());
   }
 
   connectedCallback() {
@@ -281,7 +279,6 @@ export class MotionButton extends HTMLElement {
     this.#endPress();
     this.#resizeObserver.disconnect();
     clearTimeout(this.#rippleTimer);
-    clearTimeout(this.#clickPulseTimer);
     cancelAnimationFrame(this.#frame);
     this.#frame = null;
   }
@@ -528,20 +525,6 @@ export class MotionButton extends HTMLElement {
     this.#visuallyPressed = false;
     this.toggleAttribute('pressed', false);
     this.#syncTargetState();
-  }
-
-  #pulseLowMotion() {
-    if (this.disabled || this.motionLevel !== 'low' || this.#prefersReducedMotion()) return;
-    clearTimeout(this.#clickPulseTimer);
-    this.#visuallyPressed = true;
-    this.toggleAttribute('pressed', true);
-    this.#syncTargetState();
-    this.#clickPulseTimer = setTimeout(() => {
-      this.#visuallyPressed = false;
-      this.toggleAttribute('pressed', false);
-      this.#syncTargetState();
-      this.#clickPulseTimer = null;
-    }, 160);
   }
 
   #performHaptic(haptic) {
