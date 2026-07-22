@@ -183,13 +183,17 @@ const fontAxes = {
     ? { weight: 500, width: 115, round: 200 }
     : level === 'medium'
       ? { weight: 550, width: 110, round: 200 }
-      : { weight: 600, width: 100, round: 200 },
+      : level === 'low'
+        ? { weight: 575, width: 106, round: 200 }
+        : { weight: 600, width: 100, round: 200 },
   selected: () => ({ weight: 600, width: 110, round: 200 }),
   selectedPressed: level => level === 'high'
     ? { weight: 500, width: 85, round: 200 }
     : level === 'medium'
       ? { weight: 550, width: 90, round: 200 }
-      : { weight: 600, width: 110, round: 200 },
+      : level === 'low'
+        ? { weight: 575, width: 104, round: 200 }
+        : { weight: 600, width: 110, round: 200 },
 };
 
 const symbolAxes = {
@@ -198,7 +202,9 @@ const symbolAxes = {
     ? { weight: 200, fill: 0, grad: 50, opsz: 30 }
     : level === 'medium'
       ? { weight: 300, fill: 0, grad: 70, opsz: 10 }
-      : { weight: 400, fill: 0, grad: 100, opsz: 24 },
+      : level === 'low'
+        ? { weight: 520, fill: 0, grad: 80, opsz: 20 }
+        : { weight: 400, fill: 0, grad: 100, opsz: 24 },
   selected: level => level === 'none'
     ? { weight: 700, fill: 1, grad: 100, opsz: 24 }
     : level === 'low'
@@ -209,7 +215,7 @@ const symbolAxes = {
     : level === 'medium'
       ? { weight: 300, fill: 1, grad: 0, opsz: 20 }
       : level === 'low'
-        ? { weight: 600, fill: 1, grad: 100, opsz: 12 }
+        ? { weight: 520, fill: 1, grad: 70, opsz: 18 }
         : { weight: 700, fill: 1, grad: 100, opsz: 24 },
 };
 
@@ -224,6 +230,7 @@ export class MotionButton extends HTMLElement {
   #icon;
   #label;
   #pressTimer = null;
+  #clickPulseTimer = null;
   #rippleTimer = null;
   #frame = null;
   #lastFrameTime = 0;
@@ -261,6 +268,7 @@ export class MotionButton extends HTMLElement {
     this.#button.addEventListener('keyup', event => {
       if (event.key === ' ' || event.key === 'Enter') this.#endPress();
     });
+    this.#button.addEventListener('click', () => this.#pulseLowMotion());
   }
 
   connectedCallback() {
@@ -273,6 +281,7 @@ export class MotionButton extends HTMLElement {
     this.#endPress();
     this.#resizeObserver.disconnect();
     clearTimeout(this.#rippleTimer);
+    clearTimeout(this.#clickPulseTimer);
     cancelAnimationFrame(this.#frame);
     this.#frame = null;
   }
@@ -519,6 +528,20 @@ export class MotionButton extends HTMLElement {
     this.#visuallyPressed = false;
     this.toggleAttribute('pressed', false);
     this.#syncTargetState();
+  }
+
+  #pulseLowMotion() {
+    if (this.disabled || this.motionLevel !== 'low' || this.#prefersReducedMotion()) return;
+    clearTimeout(this.#clickPulseTimer);
+    this.#visuallyPressed = true;
+    this.toggleAttribute('pressed', true);
+    this.#syncTargetState();
+    this.#clickPulseTimer = setTimeout(() => {
+      this.#visuallyPressed = false;
+      this.toggleAttribute('pressed', false);
+      this.#syncTargetState();
+      this.#clickPulseTimer = null;
+    }, 160);
   }
 
   #performHaptic(haptic) {

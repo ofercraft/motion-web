@@ -24,9 +24,10 @@ const styles = `
     --motion-button-font-size: var(--motion-split-font-size, 14px);
     --motion-button-icon-size: var(--motion-split-icon-size, 20px);
     --motion-button-content-gap: var(--motion-split-content-gap, 6px);
-    --motion-split-full-radius: 999px;
+    --motion-split-full-radius: calc(var(--motion-split-height, 40px) / 2);
+    --motion-split-resting-outer-radius: calc(var(--motion-split-height, 40px) / 2 - 2px);
     --motion-split-current-inner-radius: var(--motion-split-inner-radius, 6px);
-    --motion-split-current-outer-radius: var(--motion-split-outer-radius, var(--motion-split-full-radius));
+    --motion-split-current-outer-radius: var(--motion-split-outer-radius, var(--motion-split-resting-outer-radius));
   }
 
   motion-button::part(button) {
@@ -40,8 +41,10 @@ const styles = `
       border-end-end-radius var(--motion-split-corner-duration, 260ms) cubic-bezier(.2, 1.35, .35, 1);
   }
 
-  motion-button[data-pressed] {
+  motion-button[data-pressed],
+  motion-button[pressed] {
     --motion-split-current-inner-radius: var(--motion-split-pressed-inner-radius, var(--motion-split-full-radius));
+    --motion-split-current-outer-radius: var(--motion-split-pressed-outer-radius, var(--motion-split-full-radius));
   }
 
   .primary {
@@ -84,7 +87,8 @@ const styles = `
     --motion-split-current-inner-radius: var(--motion-split-selected-inner-radius, var(--motion-split-full-radius));
   }
 
-  :host([selected]) motion-button[data-pressed] {
+  :host([selected]) motion-button[data-pressed],
+  :host([selected]) motion-button[pressed] {
     --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, var(--motion-split-full-radius));
   }
 `;
@@ -244,6 +248,7 @@ export class MotionSplitButton extends HTMLElement {
     this.#split.toggleAttribute('data-width', this.hasAttribute('width'));
     this.#setSizeProperty(this, 'width', this.getAttribute('width'));
     this.#setSizeProperty(this, '--motion-split-width', this.getAttribute('width'));
+    this.#setSizeProperty(this, '--motion-split-height', this.getAttribute('height'));
     this.#setSizeProperty(this.#split, '--motion-split-gap', this.getAttribute('gap'));
 
     if (hasRatio) {
