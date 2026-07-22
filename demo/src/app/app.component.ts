@@ -37,7 +37,7 @@ export class AppComponent {
     this.motionLevel.set(change.value as MotionLevel);
   }
 
-  activate(action: 'Primary action' | 'More options'): void {
+  activate(action: 'Motion button' | 'Icon button' | 'Primary action' | 'More options'): void {
     this.lastAction.set(action);
   }
 
@@ -48,9 +48,11 @@ export class AppComponent {
 
   toggleButton(): void {
     this.buttonSelected.update(selected => !selected);
+    this.activate('Motion button');
   }
 
   toggleIconButton(): void {
     this.iconButtonSelected.update(selected => !selected);
+    this.activate('Icon button');
   }
 }

@@ -16,8 +16,8 @@
 <main>
   <section class="hero" aria-labelledby="page-title">
     <div class="hero-copy">
-      <h1 id="page-title">Motion split button</h1>
-      <p>Two expressive Motion buttons, shaped into one compact Material 3 control.</p>
+      <h1 id="page-title">Motion buttons</h1>
+      <p>Expressive Material 3 buttons with animated shape, type, and icon states.</p>
 
       <mat-button-toggle-group
         aria-label="Motion level"
@@ -32,72 +32,59 @@
     </div>
 
     <div class="specimen-panel">
-      <div class="specimen-stage">
-        <motion-split-button
-          label="Button"
-          icon="add_circle"
-          menu-icon="expand_more"
-          aria-label="Run button action"
-          menu-aria-label="Open more button actions"
-          [attr.motion-level]="motionLevel()"
-          [attr.selected]="selected() ? '' : null"
-          (primary-action)="togglePrimary()"
-          (secondary-action)="activate('More options')"
-        ></motion-split-button>
+      <div class="specimen-stage button-family-stage">
+        <div class="button-family">
+          <div class="family-item">
+            <motion-button
+              label="Continue"
+              icon="arrow_forward"
+              width="150"
+              height="48"
+              font-size="16"
+              icon-size="22"
+              aria-label="Toggle Continue button"
+              [attr.motion-level]="motionLevel()"
+              [attr.selected]="buttonSelected() ? '' : null"
+              (click)="toggleButton()"
+            ></motion-button>
+            <span>Button</span>
+          </div>
+
+          <div class="family-item">
+            <motion-button
+              icon="favorite"
+              width="48"
+              height="48"
+              icon-size="22"
+              aria-label="Toggle favorite"
+              [attr.motion-level]="motionLevel()"
+              [attr.selected]="iconButtonSelected() ? '' : null"
+              (click)="toggleIconButton()"
+            ></motion-button>
+            <span>Icon button</span>
+          </div>
+
+          <div class="family-item">
+            <motion-split-button
+              label="Button"
+              icon="add_circle"
+              menu-icon="expand_more"
+              height="48"
+              font-size="16"
+              icon-size="22"
+              aria-label="Run button action"
+              menu-aria-label="Open more button actions"
+              [attr.motion-level]="motionLevel()"
+              [attr.selected]="selected() ? '' : null"
+              (primary-action)="togglePrimary()"
+              (secondary-action)="activate('More options')"
+            ></motion-split-button>
+            <span>Split button</span>
+          </div>
+        </div>
       </div>
       <p class="action-status" aria-live="polite">{{ lastAction() }}</p>
     </div>
-  </section>
-
-  <section class="button-demos" aria-labelledby="button-demos-title">
-    <div class="section-heading">
-      <h2 id="button-demos-title">Motion button demos</h2>
-      <p>Click either button to see its selected motion. Both follow the motion level above.</p>
-    </div>
-
-    <mat-card appearance="outlined" class="button-demo-card">
-      <mat-card-header>
-        <mat-card-title>Motion button</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="button-demo-stage">
-          <motion-button
-            label="Continue"
-            icon="arrow_forward"
-            width="176"
-            height="64"
-            font-size="18"
-            icon-size="24"
-            aria-label="Toggle Continue button"
-            [attr.motion-level]="motionLevel()"
-            [attr.selected]="buttonSelected() ? '' : null"
-            (click)="toggleButton()"
-          ></motion-button>
-        </div>
-        <p class="action-status" aria-live="polite">{{ buttonSelected() ? 'Selected' : 'Default' }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card appearance="outlined" class="button-demo-card">
-      <mat-card-header>
-        <mat-card-title>Icon Motion button</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="button-demo-stage">
-          <motion-button
-            icon="favorite"
-            width="64"
-            height="64"
-            icon-size="26"
-            aria-label="Toggle favorite"
-            [attr.motion-level]="motionLevel()"
-            [attr.selected]="iconButtonSelected() ? '' : null"
-            (click)="toggleIconButton()"
-          ></motion-button>
-        </div>
-        <p class="action-status" aria-live="polite">{{ iconButtonSelected() ? 'Selected' : 'Default' }}</p>
-      </mat-card-content>
-    </mat-card>
   </section>
 
   <section class="details" aria-label="Usage details">
