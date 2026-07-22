@@ -1,4 +1,4 @@
-const googleSansFlexUrl = new URL('./fonts/google_sans_flex.ttf', import.meta.url).href;
+const feldmanFontUrl = new URL('./fonts/feldman_font.ttf', import.meta.url).href;
 const materialSymbolsUrl = new URL('./fonts/material_symbols_rounded.ttf', import.meta.url).href;
 
 function ensureMotionStyles() {
@@ -7,8 +7,8 @@ function ensureMotionStyles() {
   style.id = 'motion-web-fonts';
   style.textContent = `
     @font-face {
-      font-family: 'Motion Google Sans Flex';
-      src: url('${googleSansFlexUrl}') format('truetype');
+      font-family: 'Motion Feldman Font';
+      src: url('${feldmanFontUrl}') format('truetype');
       font-weight: 1 1000;
       font-stretch: 25% 151%;
       font-style: normal;
@@ -119,7 +119,7 @@ const styles = `
     place-items: center;
     width: var(--motion-button-icon-size, 24px);
     height: var(--motion-button-icon-size, 24px);
-    font-family: 'Motion Material Symbols Rounded', 'Material Symbols Rounded', sans-serif;
+    font-family: 'Motion Material Symbols Rounded';
     font-size: calc(var(--motion-button-icon-size, 24px) * .92);
     font-style: normal;
     font-weight: normal;
@@ -139,7 +139,7 @@ const styles = `
 
   ::slotted(.label) {
     overflow: hidden;
-    font-family: 'Motion Google Sans Flex', var(--motion-button-font-family, sans-serif);
+    font-family: 'Motion Feldman Font';
     font-size: var(--motion-button-font-size, 24px);
     font-style: normal;
     line-height: 1.15;

@@ -16,7 +16,7 @@ import 'motion-web/motion-button';
 <motion-button icon="play_arrow" aria-label="Play" motion-level="medium" width="76" height="52"></motion-button>
 ```
 
-The button is controlled: set `selected` for its selected state. It reproduces Android's four resolved states, 100 ms delayed press response, corner and outline springs, variable Google Sans text axes, and variable Material Symbol axes.
+The button is controlled: set `selected` for its selected state. It reproduces Android's four resolved states, 100 ms delayed press response, corner and outline springs, variable Feldman Font text axes, and variable Material Symbol axes.
 
 ```js
 const button = document.querySelector('motion-button');
