@@ -100,7 +100,7 @@ const styles = `
 
   :host([selected]) motion-button[data-pressed],
   :host([selected]) motion-button[pressed] {
-    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, 50%);
+    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, var(--motion-split-full-radius));
   }
 `;
 
