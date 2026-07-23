@@ -8,8 +8,8 @@ const styles = `
   }
 
   :host([motion-level="low"]) {
-    --motion-split-corner-duration: 440ms;
-    --motion-split-corner-easing: linear(0, 1.22 36%, .9 57%, 1.06 74%, .98 88%, 1);
+    --motion-split-corner-duration: 400ms;
+    --motion-split-corner-easing: cubic-bezier(.2, 1.3, .35, 1);
   }
 
   .split {
@@ -100,7 +100,7 @@ const styles = `
 
   :host([selected]) motion-button[data-pressed],
   :host([selected]) motion-button[pressed] {
-    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, var(--motion-split-inner-radius, 6px));
+    --motion-split-current-inner-radius: var(--motion-split-selected-pressed-inner-radius, 50%);
   }
 `;
 

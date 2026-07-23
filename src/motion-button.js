@@ -138,18 +138,22 @@ const styles = `
   }
 
   ::slotted(.label) {
-    overflow: hidden;
+    overflow: visible;
     font-family: 'Motion Feldman Font';
     font-size: var(--motion-button-font-size, 24px);
     font-style: normal;
     line-height: 1.15;
     text-align: start;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     white-space: nowrap;
     font-variation-settings:
       'wght' var(--motion-font-weight, 600),
       'wdth' var(--motion-font-width, 100),
       'ROND' var(--motion-font-round, 200);
+  }
+
+  :host(:not([vertical])) ::slotted(.label) {
+    flex-shrink: 0;
   }
 
   :host([vertical]) ::slotted(.label) {
