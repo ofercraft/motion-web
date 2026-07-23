@@ -1,4 +1,4 @@
-import './motion-button.js';
+import { MOTION_LEVEL_CHANGE_EVENT } from './motion-button.js';
 
 const styles = `
   :host {
@@ -7,9 +7,9 @@ const styles = `
     vertical-align: middle;
   }
 
-  :host([motion-level="low"]) {
-    --motion-split-corner-duration: 400ms;
-    --motion-split-corner-easing: cubic-bezier(.2, 1.3, .35, 1);
+  :host([data-motion-level="low"]) {
+    --motion-split-corner-duration: 340ms;
+    --motion-split-corner-easing: cubic-bezier(.2, 1.7, .35, 0.85);
   }
 
   .split {
@@ -40,6 +40,7 @@ const styles = `
       background-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
       color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
       border-color var(--motion-color-duration, 120ms) var(--motion-color-easing, cubic-bezier(.4, 0, .2, 1)),
+      width var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
       border-start-start-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
       border-start-end-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
       border-end-start-radius var(--motion-split-corner-duration, 260ms) var(--motion-split-corner-easing, cubic-bezier(.2, 1.35, .35, 1)),
@@ -104,20 +105,35 @@ const styles = `
   }
 `;
 
-const defaultState = {
-  backgroundColor: 'var(--motion-split-background, #d0bcff)',
-  contentColor: 'var(--motion-split-color, #21005d)',
+// Each half resolves its own color variables first, falling back to the
+// shared split-wide ones, so the two buttons can be themed independently.
+const primaryDefaultState = {
+  backgroundColor: 'var(--motion-split-primary-background, var(--motion-split-background, #d0bcff))',
+  contentColor: 'var(--motion-split-primary-color, var(--motion-split-color, #21005d))',
 };
 
-const selectedState = {
-  backgroundColor: 'var(--motion-split-selected-background, var(--mat-sys-primary, #6750a4))',
-  contentColor: 'var(--motion-split-selected-color, var(--mat-sys-on-primary, #fff))',
+const secondaryDefaultState = {
+  backgroundColor: 'var(--motion-split-secondary-background, var(--motion-split-background, #d0bcff))',
+  contentColor: 'var(--motion-split-secondary-color, var(--motion-split-color, #21005d))',
+};
+
+const primarySelectedState = {
+  backgroundColor: 'var(--motion-split-primary-selected-background, var(--motion-split-selected-background, var(--mat-sys-primary, #6750a4)))',
+  contentColor: 'var(--motion-split-primary-selected-color, var(--motion-split-selected-color, var(--mat-sys-on-primary, #fff)))',
+  // Keep the label at its resting width so the split never changes size on selection.
+  fontAxes: { width: 100 },
+};
+
+const secondarySelectedState = {
+  backgroundColor: 'var(--motion-split-secondary-selected-background, var(--motion-split-selected-background, var(--mat-sys-primary, #6750a4)))',
+  contentColor: 'var(--motion-split-secondary-selected-color, var(--motion-split-selected-color, var(--mat-sys-on-primary, #fff)))',
+  fontAxes: { width: 100 },
 };
 
 export class MotionSplitButton extends HTMLElement {
   static observedAttributes = [
     'label', 'icon', 'menu-icon', 'aria-label', 'menu-aria-label',
-    'selected', 'disabled', 'motion-level', 'haptics-enabled',
+    'selected', 'disabled', 'motion-level', 'haptics-enabled', 'icon-trailing',
     'width', 'height', 'font-size', 'icon-size', 'gap', 'content-gap',
     'primary-width', 'secondary-width', 'primary-padding', 'secondary-padding',
     'primary-ratio', 'secondary-ratio',
@@ -126,8 +142,11 @@ export class MotionSplitButton extends HTMLElement {
   #split;
   #primary;
   #secondary;
-  #layoutUnlockTimer = null;
-  #pressObservers = [];
+  #downTimes = new Map();
+  #tapTimers = new Map();
+  #measureKey = null;
+  #fontsListener = null;
+  #levelListener = null;
 
   constructor() {
     super();
@@ -143,69 +162,93 @@ export class MotionSplitButton extends HTMLElement {
     this.#primary = root.querySelector('.primary');
     this.#secondary = root.querySelector('.secondary');
 
+    for (const button of [this.#primary, this.#secondary]) {
+      button.addEventListener('pointerdown', () => this.#downTimes.set(button, performance.now()));
+    }
     this.#primary.addEventListener('click', event => {
       event.stopPropagation();
+      const wasSelected = this.selected;
       this.dispatchEvent(new CustomEvent('primary-action', {
         bubbles: true,
         composed: true,
         detail: { source: 'primary' },
       }));
+      this.#tapPulse(this.#primary, wasSelected);
     });
     this.#secondary.addEventListener('click', event => {
       event.stopPropagation();
+      const wasSelected = this.selected;
       this.dispatchEvent(new CustomEvent('secondary-action', {
         bubbles: true,
         composed: true,
         detail: { source: 'secondary' },
       }));
+      this.#tapPulse(this.#secondary, wasSelected);
     });
   }
 
   connectedCallback() {
-    this.#observePressState();
     this.#sync();
+    this.#fontsListener = () => this.#updatePrimaryWidth(true);
+    document.fonts?.addEventListener('loadingdone', this.#fontsListener);
+    document.fonts?.ready.then(() => {
+      if (this.isConnected) this.#updatePrimaryWidth(true);
+    });
+    this.#levelListener = () => { if (!this.hasAttribute('motion-level')) this.#sync(); };
+    document.addEventListener(MOTION_LEVEL_CHANGE_EVENT, this.#levelListener);
   }
 
   disconnectedCallback() {
-    clearTimeout(this.#layoutUnlockTimer);
-    for (const observer of this.#pressObservers) observer.disconnect();
-    this.#pressObservers = [];
+    document.fonts?.removeEventListener('loadingdone', this.#fontsListener);
+    document.removeEventListener(MOTION_LEVEL_CHANGE_EVENT, this.#levelListener);
+    for (const timer of this.#tapTimers.values()) clearTimeout(timer);
+    this.#tapTimers.clear();
   }
 
   attributeChangedCallback() {
     this.#sync();
   }
 
-  #observePressState() {
-    if (this.#pressObservers.length) return;
-    for (const button of [this.#primary, this.#secondary]) {
-      const observer = new MutationObserver(() => {
-        if (button.hasAttribute('pressed')) this.#lockLayout();
-        else this.#scheduleLayoutUnlock();
-      });
-      observer.observe(button, { attributes: true, attributeFilter: ['pressed'] });
-      this.#pressObservers.push(observer);
-    }
+  #tapPulse(button, wasSelected) {
+    // Quick taps release before the press visuals engage; give the corners a
+    // brief dip through the (previous state's) pressed pose so taps bounce.
+    const downTime = this.#downTimes.get(button) ?? 0;
+    if (performance.now() - downTime > 175) return;
+    if (this.motionLevel === 'none' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const inner = wasSelected
+      ? 'var(--motion-split-selected-pressed-inner-radius, calc(var(--motion-split-full-radius) / 2))'
+      : 'var(--motion-split-pressed-inner-radius, var(--motion-split-full-radius))';
+    const outer = 'var(--motion-split-pressed-outer-radius, var(--motion-split-full-radius))';
+    button.style.setProperty('--motion-split-current-inner-radius', inner);
+    button.style.setProperty('--motion-split-current-outer-radius', outer);
+    clearTimeout(this.#tapTimers.get(button));
+    this.#tapTimers.set(button, setTimeout(() => {
+      button.style.removeProperty('--motion-split-current-inner-radius');
+      button.style.removeProperty('--motion-split-current-outer-radius');
+      this.#tapTimers.delete(button);
+    }, 160));
   }
 
-  #lockLayout() {
-    clearTimeout(this.#layoutUnlockTimer);
-    const splitWidth = this.#split.getBoundingClientRect().width;
-    const primaryWidth = this.#primary.getBoundingClientRect().width;
-    const secondaryWidth = this.#secondary.getBoundingClientRect().width;
-    this.#split.style.width = `${splitWidth}px`;
-    this.#primary.style.setProperty('--motion-button-width', `${primaryWidth}px`);
-    this.#secondary.style.setProperty('--motion-button-width', `${secondaryWidth}px`);
-  }
-
-  #scheduleLayoutUnlock() {
-    clearTimeout(this.#layoutUnlockTimer);
-    this.#layoutUnlockTimer = setTimeout(() => {
-      this.#split.style.removeProperty('width');
+  #updatePrimaryWidth(force = false) {
+    if (!this.isConnected) return;
+    if (this.#split.hasAttribute('data-ratio') || this.#split.hasAttribute('data-width')
+      || this.hasAttribute('primary-width')) {
       this.#primary.style.removeProperty('--motion-button-width');
-      this.#secondary.style.removeProperty('--motion-button-width');
-      this.#layoutUnlockTimer = null;
-    }, 900);
+      this.#measureKey = null;
+      return;
+    }
+    const key = ['label', 'icon', 'font-size', 'icon-size', 'height', 'primary-padding', 'content-gap']
+      .map(name => this.getAttribute(name) ?? '').join('|');
+    if (!force && key === this.#measureKey) return;
+    this.#measureKey = key;
+    // Pin the primary to its natural resting width (the widest pose) plus a
+    // small cushion for spring overshoot, so axis bounces never move layout.
+    // Content changes re-measure and the width transition animates the jump.
+    this.#primary.style.removeProperty('--motion-button-width');
+    const natural = this.#primary.getBoundingClientRect().width;
+    if (natural > 0) {
+      this.#primary.style.setProperty('--motion-button-width', `${Math.ceil(natural) + 2}px`);
+    }
   }
 
   get label() { return this.getAttribute('label') ?? ''; }
@@ -218,7 +261,14 @@ export class MotionSplitButton extends HTMLElement {
   set selected(value) { this.toggleAttribute('selected', Boolean(value)); }
   get disabled() { return this.hasAttribute('disabled'); }
   set disabled(value) { this.toggleAttribute('disabled', Boolean(value)); }
-  get motionLevel() { return this.getAttribute('motion-level') ?? 'low'; }
+  get motionLevel() {
+    const own = this.getAttribute('motion-level');
+    if (own) return own;
+    const inherited = this.isConnected
+      ? getComputedStyle(this).getPropertyValue('--motion-level').trim()
+      : '';
+    return inherited || 'low';
+  }
   set motionLevel(value) { this.#setStringAttribute('motion-level', value); }
   get width() { return this.getAttribute('width') ?? ''; }
   set width(value) { this.#setStringAttribute('width', value); }
@@ -248,13 +298,19 @@ export class MotionSplitButton extends HTMLElement {
   #sync() {
     if (!this.#primary || !this.#secondary) return;
 
+    const level = this.motionLevel;
+    // Reflect the resolved level so the corner-easing CSS (:host([data-motion-level]))
+    // works whether the level is explicit or inherited from --motion-level.
+    this.dataset.motionLevel = level;
+
     this.#primary.label = this.label;
     this.#primary.icon = this.icon;
+    this.#primary.toggleAttribute('icon-trailing', this.hasAttribute('icon-trailing'));
     this.#primary.selected = this.selected;
     this.#primary.disabled = this.disabled;
-    this.#primary.motionLevel = this.motionLevel;
-    this.#primary.defaultState = defaultState;
-    this.#primary.selectedState = selectedState;
+    this.#primary.motionLevel = level;
+    this.#primary.defaultState = primaryDefaultState;
+    this.#primary.selectedState = primarySelectedState;
     this.#syncAttribute(this.#primary, 'height', 'height');
     this.#syncAttribute(this.#primary, 'font-size', 'font-size');
     this.#syncAttribute(this.#primary, 'icon-size', 'icon-size');
@@ -267,9 +323,9 @@ export class MotionSplitButton extends HTMLElement {
 
     this.#secondary.icon = this.menuIcon;
     this.#secondary.disabled = this.disabled;
-    this.#secondary.motionLevel = this.motionLevel;
-    this.#secondary.defaultState = defaultState;
-    this.#secondary.selectedState = selectedState;
+    this.#secondary.motionLevel = level;
+    this.#secondary.defaultState = secondaryDefaultState;
+    this.#secondary.selectedState = secondarySelectedState;
     this.#syncAttribute(this.#secondary, 'height', 'height');
     this.#syncAttribute(this.#secondary, 'font-size', 'font-size');
     this.#syncAttribute(this.#secondary, 'icon-size', 'icon-size');
@@ -308,6 +364,8 @@ export class MotionSplitButton extends HTMLElement {
       this.#primary.setAttribute('haptics-enabled', hapticsEnabled);
       this.#secondary.setAttribute('haptics-enabled', hapticsEnabled);
     }
+
+    this.#updatePrimaryWidth();
   }
 
   #setStringAttribute(name, value) {

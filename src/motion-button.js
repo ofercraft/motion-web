@@ -28,6 +28,21 @@ function ensureMotionStyles() {
   document.head.append(style);
 }
 
+// Name of the event MotionButton/MotionSplitButton listen for to re-resolve
+// the inherited `--motion-level` default at runtime.
+export const MOTION_LEVEL_CHANGE_EVENT = 'motion-level-change';
+
+// Set the site-wide default motion level by writing the inherited
+// `--motion-level` custom property (declarative equivalent: a CSS rule such as
+// `:root { --motion-level: high }`). Individual controls that set their own
+// `motion-level` attribute keep their value. Dispatches an event so already
+// rendered controls re-resolve immediately.
+export function setDefaultMotionLevel(level, target = document.documentElement) {
+  if (level) target.style.setProperty('--motion-level', level);
+  else target.style.removeProperty('--motion-level');
+  document.dispatchEvent(new CustomEvent(MOTION_LEVEL_CHANGE_EVENT));
+}
+
 const motionSpecs = {
   none: {
     corner: { type: 'snap' },
@@ -36,8 +51,8 @@ const motionSpecs = {
     symbol: { duration: 0, easing: 'linear' },
   },
   low: {
-    corner: { type: 'spring', dampingRatio: 0.7, stiffness: 400 },
-    font: { type: 'spring', dampingRatio: 0.2, stiffness: 450 },
+    corner: { type: 'spring', dampingRatio: 0.42, stiffness: 1050 },
+    font: { type: 'spring', dampingRatio: 0.32, stiffness: 800 },
     color: { duration: 90, easing: 'linear' },
     symbol: { duration: 100, easing: 'cubic-bezier(0, 0, .2, 1)' },
   },
@@ -71,7 +86,8 @@ const styles = `
     gap: var(--motion-button-content-gap, 8px);
     box-sizing: border-box;
     width: var(--motion-button-width, auto);
-    min-width: var(--motion-button-min-width, 58px);
+    /* Never let the min-width force the button wider than an explicit width. */
+    min-width: min(var(--motion-button-min-width, 58px), var(--motion-button-width, 9999px));
     height: var(--motion-button-height, 80px);
     margin: 0;
     overflow: hidden;
@@ -93,6 +109,8 @@ const styles = `
   }
 
   :host([vertical]) button { flex-direction: column; }
+
+  :host([icon-trailing]:not([vertical])) button { flex-direction: row-reverse; }
 
   button:focus-visible {
     outline: 3px solid color-mix(in srgb, var(--motion-bg, #65558f), transparent 38%);
@@ -190,7 +208,7 @@ const fontAxes = {
       : level === 'low'
         ? { weight: 500, width: 100, round: 200 }
         : { weight: 600, width: 100, round: 200 },
-  selected: level => ({ weight: 600, width: level === 'low' ? 100 : 110, round: 200 }),
+  selected: () => ({ weight: 600, width: 110, round: 200 }),
   selectedPressed: level => level === 'high'
     ? { weight: 500, width: 85, round: 200 }
     : level === 'medium'
@@ -234,6 +252,8 @@ export class MotionButton extends HTMLElement {
   #icon;
   #label;
   #pressTimer = null;
+  #pulseTimer = null;
+  #axesPulse = false;
   #rippleTimer = null;
   #frame = null;
   #lastFrameTime = 0;
@@ -248,6 +268,12 @@ export class MotionButton extends HTMLElement {
   #values = {};
   #targets = {};
   #velocities = {};
+  #resolvedLevel = 'medium';
+  #onLevelChange = () => {
+    if (this.hasAttribute('motion-level')) return;
+    this.#resolveLevel();
+    this.#syncTargetState();
+  };
 
   constructor() {
     super();
@@ -276,19 +302,32 @@ export class MotionButton extends HTMLElement {
   connectedCallback() {
     this.#ensureContent();
     this.#resizeObserver.observe(this.#button);
+    document.addEventListener(MOTION_LEVEL_CHANGE_EVENT, this.#onLevelChange);
+    this.#resolveLevel();
     this.#sync();
   }
 
   disconnectedCallback() {
     this.#endPress();
     this.#resizeObserver.disconnect();
+    document.removeEventListener(MOTION_LEVEL_CHANGE_EVENT, this.#onLevelChange);
     clearTimeout(this.#rippleTimer);
     cancelAnimationFrame(this.#frame);
     this.#frame = null;
   }
 
   attributeChangedCallback() {
+    this.#resolveLevel();
     this.#sync();
+  }
+
+  // Own `motion-level` attribute wins; otherwise inherit the `--motion-level`
+  // custom property (the site-wide default); otherwise 'medium'.
+  #resolveLevel() {
+    const own = this.getAttribute('motion-level');
+    this.#resolvedLevel = own
+      || (this.isConnected ? getComputedStyle(this).getPropertyValue('--motion-level').trim() : '')
+      || 'medium';
   }
 
   get icon() { return this.getAttribute('icon') ?? ''; }
@@ -299,7 +338,7 @@ export class MotionButton extends HTMLElement {
   set selected(value) { this.toggleAttribute('selected', Boolean(value)); }
   get disabled() { return this.hasAttribute('disabled'); }
   set disabled(value) { this.toggleAttribute('disabled', Boolean(value)); }
-  get motionLevel() { return this.getAttribute('motion-level') ?? 'medium'; }
+  get motionLevel() { return this.#resolvedLevel; }
   set motionLevel(value) { this.#setStringAttribute('motion-level', value); }
   get motionSpec() { return this.#motionSpec; }
   set motionSpec(value) { this.#motionSpec = value; this.#syncTargetState(); }
@@ -363,6 +402,13 @@ export class MotionButton extends HTMLElement {
     if (!this.#button) return;
     const state = this.#currentState();
     const spec = this.#currentSpec();
+    let fontAxesNow = state.fontAxes;
+    let symbolAxesNow = state.symbolAxes;
+    if (this.#axesPulse) {
+      const pressed = this.selected ? this.#resolveSelectedPressed() : this.#resolveDefaultPressed();
+      fontAxesNow = pressed.fontAxes;
+      symbolAxesNow = pressed.symbolAxes;
+    }
     this.#button.style.setProperty('--motion-bg', state.backgroundColor);
     this.#button.style.setProperty('--motion-fg', state.contentColor);
     this.#button.style.setProperty('--motion-outline-color', state.outlineColor);
@@ -370,17 +416,17 @@ export class MotionButton extends HTMLElement {
     this.#button.style.setProperty('--motion-color-easing', spec.color.easing);
     this.#button.style.setProperty('--motion-symbol-duration', `${spec.symbol.duration}ms`);
     this.#button.style.setProperty('--motion-symbol-easing', spec.symbol.easing);
-    this.#button.style.setProperty('--motion-font-round', String(state.fontAxes.round));
-    this.#button.style.setProperty('--motion-symbol-fill', String(state.symbolAxes.fill));
+    this.#button.style.setProperty('--motion-font-round', String(fontAxesNow.round));
+    this.#button.style.setProperty('--motion-symbol-fill', String(symbolAxesNow.fill));
 
     this.#targets = {
       cornerRadius: state.cornerRadius,
       outlineWidth: state.outlineWidth,
-      fontWeight: state.fontAxes.weight,
-      fontWidth: state.fontAxes.width,
-      symbolWeight: state.symbolAxes.weight,
-      symbolGrad: state.symbolAxes.grad,
-      symbolOpsz: state.symbolAxes.opsz,
+      fontWeight: fontAxesNow.weight,
+      fontWidth: fontAxesNow.width,
+      symbolWeight: symbolAxesNow.weight,
+      symbolGrad: symbolAxesNow.grad,
+      symbolOpsz: symbolAxesNow.opsz,
     };
 
     if (!this.#initialized || this.#prefersReducedMotion() || this.motionLevel === 'none') {
@@ -505,11 +551,9 @@ export class MotionButton extends HTMLElement {
     this.#endPress();
     this.#performHaptic(this.#resolveDefault().haptic);
     this.#pressTimer = setTimeout(() => {
-      this.#visuallyPressed = true;
-      this.toggleAttribute('pressed', true);
-      this.#syncTargetState();
+      this.#setVisuallyPressed(true);
       this.#pressTimer = null;
-    }, 100);
+    }, 175);
 
     const size = Math.hypot(Math.max(x, bounds.width - x), Math.max(y, bounds.height - y)) * 2;
     this.shadowRoot.querySelector('.ripple')?.remove();
@@ -523,11 +567,35 @@ export class MotionButton extends HTMLElement {
   }
 
   #endPress() {
-    clearTimeout(this.#pressTimer);
-    this.#pressTimer = null;
-    if (!this.#visuallyPressed) return;
-    this.#visuallyPressed = false;
-    this.toggleAttribute('pressed', false);
+    if (this.#pressTimer !== null) {
+      // Quick tap: press visuals never engaged. Dip the type and icon axes
+      // through the pressed pose and spring back so taps feel alive, while
+      // the corner keeps a single continuous motion toward its target.
+      clearTimeout(this.#pressTimer);
+      this.#pressTimer = null;
+      if (this.#prefersReducedMotion() || this.motionLevel === 'none') return;
+      this.#axesPulse = true;
+      this.#syncTargetState();
+      clearTimeout(this.#pulseTimer);
+      this.#pulseTimer = setTimeout(() => {
+        this.#pulseTimer = null;
+        this.#axesPulse = false;
+        this.#syncTargetState();
+      }, 160);
+      return;
+    }
+    clearTimeout(this.#pulseTimer);
+    this.#pulseTimer = null;
+    const hadPulse = this.#axesPulse;
+    this.#axesPulse = false;
+    if (this.#visuallyPressed) this.#setVisuallyPressed(false);
+    else if (hadPulse) this.#syncTargetState();
+  }
+
+  #setVisuallyPressed(value) {
+    if (this.#visuallyPressed === value) return;
+    this.#visuallyPressed = value;
+    this.toggleAttribute('pressed', value);
     this.#syncTargetState();
   }
 

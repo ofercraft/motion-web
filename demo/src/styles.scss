@@ -52,11 +52,28 @@ $dark-theme: (
 html.light-theme {
   @include mat.theme($light-theme);
   color-scheme: light;
+
+  // Saturated dark-on-light syntax colors for readability on light surfaces.
+  --code-tag: #0b57d0;
+  --code-attr: #8324b3;
+  --code-str: #0a7d3a;
+  --code-kw: #a1560a;
+  --code-fn: #0b57d0;
+  --code-var: #b0470f;
+  --code-cmt: #6b6b76;
 }
 
 html.dark-theme {
   @include mat.theme($dark-theme);
   color-scheme: dark;
+
+  --code-tag: #82aaff;
+  --code-attr: #c792ea;
+  --code-str: #c3e88d;
+  --code-kw: #ffcb6b;
+  --code-fn: #82aaff;
+  --code-var: #f78c6c;
+  --code-cmt: #8b8896;
 }
 
 * { box-sizing: border-box; }

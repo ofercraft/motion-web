@@ -54,6 +54,16 @@ export class MotionButton extends HTMLElement {
   selectedPressedState: MotionButtonState;
 }
 
+/** Event dispatched on `document` when the site-wide default motion level changes. */
+export const MOTION_LEVEL_CHANGE_EVENT: 'motion-level-change';
+
+/**
+ * Set the site-wide default motion level by writing the inherited
+ * `--motion-level` custom property. Controls with their own `motion-level`
+ * attribute keep their value.
+ */
+export function setDefaultMotionLevel(level: MotionLevel, target?: HTMLElement): void;
+
 declare global {
   interface HTMLElementTagNameMap {
     'motion-button': MotionButton;

@@ -1,127 +1,282 @@
 <header class="site-header">
   <mat-toolbar>
-    <a class="brand" href="https://github.com/ofercraft/motion-web" aria-label="Motion Web on GitHub">
-      <span class="brand-mark" aria-hidden="true">motion_blur</span>
-      <span>Motion Web</span>
+    <a class="brand" href="https://github.com/ofercraft/motion-web" aria-label="Motion Library on GitHub">
+      <img class="brand-mark" src="motion-m.webp" alt="" height="38">
+      <span>Motion Library</span>
     </a>
+    <nav class="site-nav" aria-label="Pages">
+      <button type="button" [class.active]="page() === 'demo'" (click)="page.set('demo')">Demo</button>
+      <button type="button" [class.active]="page() === 'about'" (click)="page.set('about')">About</button>
+    </nav>
     <span class="toolbar-spacer"></span>
-    <mat-slide-toggle
-      [checked]="darkTheme()"
-      (change)="setTheme($event)"
-      aria-label="Use dark theme"
-    >Dark</mat-slide-toggle>
+    <motion-button
+      class="theme-toggle"
+      width="44"
+      height="44"
+      icon-size="22"
+      [attr.icon]="darkTheme() ? 'light_mode' : 'dark_mode'"
+      [attr.aria-label]="darkTheme() ? 'Switch to light theme' : 'Switch to dark theme'"
+      (click)="toggleTheme()"
+    ></motion-button>
   </mat-toolbar>
 </header>
 
+@if (page() === 'about') {
+  <main class="about">
+    <section aria-labelledby="about-title">
+      <h1 id="about-title">About Motion Library</h1>
+      <p>
+        Motion Library is a set of expressive Material 3 controls built around motion:
+        spring-animated corner radii, variable font axes that flex with every press, and
+        icons whose weight, grade, fill, and optical size respond to interaction.
+        It ships in two implementations that share the same design and state model —
+        a Jetpack Compose library for Android and framework-independent Web Components for the web.
+      </p>
+
+      <h2>Components</h2>
+      <p>
+        <code>motion-button</code> is the core control: label, icon, vertical, and icon-only layouts,
+        four resolved states (default, pressed, selected, selected&nbsp;+&nbsp;pressed), configurable
+        motion levels (none, low, medium, high), ripples, and haptics.
+        <code>motion-split-button</code> composes two Motion buttons into Material&nbsp;3 split-button
+        geometry with shared corner morphing, per-half colors, RTL support, and animated width changes.
+      </p>
+
+      <h2>Feldman Font</h2>
+      <p>
+        Labels are set in <strong>Feldman Font</strong>, an OFL-licensed modified typeface based on
+        Google Sans Flex and Fredoka. Characters supported by Google Sans Flex retain their original
+        outlines and variable behavior; characters missing from Google Sans Flex, including Hebrew,
+        come from Fredoka.
+      </p>
+      <p>The Fredoka-derived glyphs were extended to respond to every included Google Sans Flex axis:</p>
+      <ul>
+        <li><code>opsz</code> — optical size</li>
+        <li><code>wdth</code> — width</li>
+        <li><code>wght</code> — weight</li>
+        <li><code>GRAD</code> — grade, without changing advance width</li>
+        <li><code>ROND</code> — terminal roundness</li>
+        <li><code>slnt</code> — slant</li>
+      </ul>
+      <p>
+        Fredoka's original shapes are already fully rounded, so <code>ROND=100</code> preserves those
+        outlines; moving toward <code>ROND=0</code> progressively flattens the outer terminal edges
+        while preserving bowls, counters, and glyph dimensions.
+      </p>
+      <p class="license-note">
+        Feldman Font is not affiliated with or endorsed by Google LLC or the Fredoka Project Authors.
+        It is licensed under the SIL Open Font License 1.1; the full license and copyright notices are
+        included in
+        <a href="https://github.com/ofercraft/motion-web/blob/main/src/fonts/OFL.txt">OFL.txt</a>.
+      </p>
+
+      <h2>Icons</h2>
+      <p>
+        Icons are rendered with a bundled variable build of
+        <a href="https://fonts.google.com/icons">Material Symbols Rounded</a> by Google,
+        licensed under the Apache License 2.0.
+      </p>
+
+      <h2>Source</h2>
+      <p>
+        Web components: <a href="https://github.com/ofercraft/motion-web">github.com/ofercraft/motion-web</a>
+        — MIT licensed. Install with <code>npm install github:ofercraft/motion-web</code>.
+      </p>
+    </section>
+  </main>
+} @else {
 <main>
   <section class="hero" aria-labelledby="page-title">
-    <div class="hero-copy">
-      <h1 id="page-title">Motion buttons</h1>
-      <p>Expressive Material 3 buttons with animated shape, type, and icon states.</p>
+    <h1 id="page-title">Motion buttons</h1>
+    <p>Expressive Material 3 buttons with animated shape, type, and icon states. Framework-independent Web Components.</p>
 
-      <mat-button-toggle-group
-        aria-label="Motion level"
-        [value]="motionLevel()"
-        (change)="setMotion($event)"
-      >
-        <mat-button-toggle value="none">None</mat-button-toggle>
-        <mat-button-toggle value="low">Low</mat-button-toggle>
-        <mat-button-toggle value="medium">Medium</mat-button-toggle>
-        <mat-button-toggle value="high">High</mat-button-toggle>
-      </mat-button-toggle-group>
-    </div>
+    <mat-button-toggle-group
+      aria-label="Motion level"
+      [value]="motionLevel()"
+      (change)="setMotion($event)"
+    >
+      <mat-button-toggle value="none">None</mat-button-toggle>
+      <mat-button-toggle value="low">Low</mat-button-toggle>
+      <mat-button-toggle value="medium">Medium</mat-button-toggle>
+      <mat-button-toggle value="high">High</mat-button-toggle>
+    </mat-button-toggle-group>
 
-    <div class="specimen-panel">
-      <div class="specimen-stage button-family-stage">
-        <div class="button-family">
-          <div class="family-item">
-            <motion-button
-              label="Continue"
-              icon="arrow_forward"
-              width="150"
-              height="48"
-              font-size="16"
-              icon-size="22"
-              aria-label="Toggle Continue button"
-              [attr.motion-level]="motionLevel()"
-              [attr.selected]="buttonSelected() ? '' : null"
-              (click)="toggleButton()"
-            ></motion-button>
-            <span>Button</span>
-          </div>
-
-          <div class="family-item">
-            <motion-button
-              icon="favorite"
-              width="48"
-              height="48"
-              icon-size="22"
-              aria-label="Toggle favorite"
-              [attr.motion-level]="motionLevel()"
-              [attr.selected]="iconButtonSelected() ? '' : null"
-              (click)="toggleIconButton()"
-            ></motion-button>
-            <span>Icon button</span>
-          </div>
-
-          <div class="family-item">
-            <motion-split-button
-              label="Button"
-              icon="add_circle"
-              menu-icon="expand_more"
-              height="48"
-              font-size="16"
-              icon-size="22"
-              aria-label="Run button action"
-              menu-aria-label="Open more button actions"
-              [attr.motion-level]="motionLevel()"
-              [attr.selected]="selected() ? '' : null"
-              (primary-action)="togglePrimary()"
-              (secondary-action)="activate('More options')"
-            ></motion-split-button>
-            <span>Split button</span>
-          </div>
-        </div>
-      </div>
-      <p class="action-status" aria-live="polite">{{ lastAction() }}</p>
+    <div class="hero-code">
+      <code-block [tabs]="snippets['motionLevel']"></code-block>
     </div>
   </section>
 
-  <section class="details" aria-label="Usage details">
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title>Simple syntax</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <pre><code>&lt;motion-split-button
-  label="Button"
-  icon="add_circle"
-  menu-icon="expand_more"
-&gt;&lt;/motion-split-button&gt;</code></pre>
-      </mat-card-content>
-    </mat-card>
+  <section class="component-section" aria-labelledby="button-title">
+    <div class="section-head">
+      <h2 id="button-title">Button</h2>
+      <p>One element, many designs — label with icon, icon-only, vertical, and custom colors.</p>
+    </div>
 
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title>Built from Motion buttons</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>The primary and menu actions keep independent sizing, ratios, RTL/LTR layout, ripples, keyboard focus, haptics, and motion states.</p>
-      </mat-card-content>
-    </mat-card>
+    <div class="variant-grid">
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-button
+            label="Continue"
+            icon="arrow_forward"
+            width="150"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="Toggle Continue button"
+            [attr.selected]="buttonSelected() ? '' : null"
+            (click)="toggleButton()"
+          ></motion-button>
+        </div>
+        <h3>Label + icon</h3>
+        <code-block [tabs]="snippets['labelIcon']"></code-block>
+      </article>
 
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title>Feldman Font</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Google Sans Flex outlines are combined with Fredoka characters, including Hebrew, with variable weight, width, grade, optical size, slant, and roundness.</p>
-      </mat-card-content>
-    </mat-card>
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-button
+            icon="favorite"
+            width="48"
+            height="48"
+            icon-size="22"
+            aria-label="Toggle favorite"
+            [attr.selected]="iconButtonSelected() ? '' : null"
+            (click)="toggleIconButton()"
+          ></motion-button>
+        </div>
+        <h3>Icon button</h3>
+        <code-block [tabs]="snippets['iconOnly']"></code-block>
+      </article>
+
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-button
+            vertical
+            label="Design"
+            icon="palette"
+            width="92"
+            height="76"
+            font-size="14"
+            icon-size="24"
+            aria-label="Toggle vertical Design button"
+            [attr.selected]="verticalSelected() ? '' : null"
+            (click)="toggleVertical()"
+          ></motion-button>
+        </div>
+        <h3>Vertical</h3>
+        <code-block [tabs]="snippets['vertical']"></code-block>
+      </article>
+
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-button
+            class="tonal"
+            label="Tonal"
+            icon="brush"
+            width="130"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="Toggle tonal button"
+            [attr.selected]="tonalSelected() ? '' : null"
+            (click)="toggleTonal()"
+          ></motion-button>
+        </div>
+        <h3>Custom colors</h3>
+        <code-block [tabs]="snippets['tonal']"></code-block>
+      </article>
+    </div>
+  </section>
+
+  <section class="component-section" aria-labelledby="split-title">
+    <div class="section-head">
+      <h2 id="split-title">Split button</h2>
+      <p>Two Motion buttons with shared shape morphing — independent colors, RTL layout, and trailing icons included.</p>
+    </div>
+
+    <div class="variant-grid">
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-split-button
+            label="Button"
+            icon="add_circle"
+            menu-icon="expand_more"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="Run button action"
+            menu-aria-label="Open more button actions"
+            [attr.selected]="selected() ? '' : null"
+            (primary-action)="togglePrimary()"
+          ></motion-split-button>
+        </div>
+        <h3>Split button</h3>
+        <code-block [tabs]="snippets['split']"></code-block>
+      </article>
+
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-split-button
+            class="two-tone"
+            icon="download"
+            menu-icon="expand_more"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="Cycle download state"
+            menu-aria-label="Open download options"
+            [attr.label]="downloadLabels[downloadState()]"
+            [attr.selected]="downloadState() === 2 ? '' : null"
+            (primary-action)="cycleDownload()"
+          ></motion-split-button>
+        </div>
+        <h3>Two-tone + changing label</h3>
+        <code-block [tabs]="snippets['twoTone']"></code-block>
+      </article>
+
+      <article class="variant">
+        <div class="variant-stage" dir="rtl">
+          <motion-split-button
+            label="הורדה"
+            icon="download"
+            menu-icon="expand_more"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="הורדה"
+            menu-aria-label="אפשרויות נוספות"
+            [attr.selected]="rtlSelected() ? '' : null"
+            (primary-action)="toggleRtl()"
+          ></motion-split-button>
+        </div>
+        <h3>RTL</h3>
+        <code-block [tabs]="snippets['rtl']"></code-block>
+      </article>
+
+      <article class="variant">
+        <div class="variant-stage">
+          <motion-split-button
+            icon-trailing
+            label="Next"
+            icon="arrow_forward"
+            menu-icon="expand_more"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="Go to next"
+            menu-aria-label="Open next options"
+            [attr.selected]="trailingSelected() ? '' : null"
+            (primary-action)="toggleTrailing()"
+          ></motion-split-button>
+        </div>
+        <h3>Trailing icon</h3>
+        <code-block [tabs]="snippets['trailing']"></code-block>
+      </article>
+    </div>
   </section>
 </main>
+}
 
 <footer>
-  <span>Motion Web 0.5.1</span>
+  <span>Motion Library 0.6.0</span>
   <a href="https://github.com/ofercraft/motion-web">GitHub</a>
 </footer>
