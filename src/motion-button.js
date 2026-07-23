@@ -206,7 +206,7 @@ const fontAxes = {
     : level === 'medium'
       ? { weight: 550, width: 110, round: 200 }
       : level === 'low'
-        ? { weight: 500, width: 100, round: 200 }
+        ? { weight: 500, width: 105, round: 200 }
         : { weight: 600, width: 100, round: 200 },
   selected: () => ({ weight: 600, width: 110, round: 200 }),
   selectedPressed: level => level === 'high'
@@ -214,7 +214,7 @@ const fontAxes = {
     : level === 'medium'
       ? { weight: 550, width: 90, round: 200 }
       : level === 'low'
-        ? { weight: 500, width: 100, round: 200 }
+        ? { weight: 500, width: 95, round: 200 }
         : { weight: 600, width: 110, round: 200 },
 };
 
