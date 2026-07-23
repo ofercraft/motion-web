@@ -14,7 +14,10 @@
           "options": {
             "browser": "demo/src/main.ts",
             "tsConfig": "demo/tsconfig.app.json",
-            "assets": [{ "glob": "**/*", "input": "demo/public" }],
+            "assets": [
+              { "glob": "**/*", "input": "demo/public" },
+              { "glob": "**/*", "input": "src/fonts", "output": "fonts" }
+            ],
             "inlineStyleLanguage": "scss",
             "styles": ["demo/src/styles.scss"],
             "outputPath": "dist/motion-web-demo",

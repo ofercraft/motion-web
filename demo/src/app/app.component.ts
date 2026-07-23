@@ -21,7 +21,7 @@ type MotionLevel = 'none' | 'low' | 'medium' | 'high';
 export class AppComponent {
   readonly darkTheme = signal(true);
   readonly page = signal<'demo' | 'about'>('demo');
-  readonly motionLevel = signal<MotionLevel>('low');
+  readonly motionLevel = signal<MotionLevel>('medium');
   readonly selected = signal(false);
   readonly buttonSelected = signal(false);
   readonly iconButtonSelected = signal(false);
