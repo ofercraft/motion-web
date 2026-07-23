@@ -36,7 +36,7 @@ const motionSpecs = {
     symbol: { duration: 0, easing: 'linear' },
   },
   low: {
-    corner: { type: 'spring', dampingRatio: 0.35, stiffness: 450 },
+    corner: { type: 'spring', dampingRatio: 0.7, stiffness: 400 },
     font: { type: 'spring', dampingRatio: 0.2, stiffness: 450 },
     color: { duration: 90, easing: 'linear' },
     symbol: { duration: 100, easing: 'cubic-bezier(0, 0, .2, 1)' },
