@@ -27,6 +27,7 @@ export class AppComponent {
   readonly iconButtonSelected = signal(false);
   readonly verticalSelected = signal(false);
   readonly tonalSelected = signal(false);
+  readonly hebrewButtonSelected = signal(false);
   readonly rtlSelected = signal(false);
   readonly trailingSelected = signal(false);
   readonly downloadState = signal(0);
@@ -153,6 +154,29 @@ button.className = 'tonal';
 button.label = 'Tonal';
 button.icon = 'brush';
 document.body.append(button);`,
+      },
+    ],
+    hebrewButton: [
+      {
+        lang: 'HTML',
+        code: `<div dir="rtl">
+  <motion-button
+    label="המשך"
+    icon="arrow_back"
+    width="150" height="48"
+    font-size="16" icon-size="22"
+  ></motion-button>
+</div>`,
+      },
+      {
+        lang: 'JS',
+        code: `const wrapper = document.createElement('div');
+wrapper.dir = 'rtl';
+const button = document.createElement('motion-button');
+button.label = 'המשך';
+button.icon = 'arrow_back';
+wrapper.append(button);
+document.body.append(wrapper);`,
       },
     ],
     split: [
@@ -297,6 +321,10 @@ document.body.append(split);`,
 
   toggleTonal(): void {
     this.tonalSelected.update(selected => !selected);
+  }
+
+  toggleHebrewButton(): void {
+    this.hebrewButtonSelected.update(selected => !selected);
   }
 
   toggleRtl(): void {

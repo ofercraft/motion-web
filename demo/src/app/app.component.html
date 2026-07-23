@@ -109,7 +109,7 @@
   <section class="component-section" aria-labelledby="button-title">
     <div class="section-head">
       <h2 id="button-title">Button</h2>
-      <p>One element, many designs — label with icon, icon-only, vertical, and custom colors.</p>
+      <p>One element, many designs — label with icon, icon-only, vertical, custom colors, and Hebrew (RTL) support.</p>
     </div>
 
     <div class="variant-grid">
@@ -183,6 +183,24 @@
         </div>
         <h3>Custom colors</h3>
         <code-block [tabs]="snippets['tonal']"></code-block>
+      </article>
+
+      <article class="variant">
+        <div class="variant-stage" dir="rtl">
+          <motion-button
+            label="המשך"
+            icon="arrow_back"
+            width="150"
+            height="48"
+            font-size="16"
+            icon-size="22"
+            aria-label="לחצן המשך"
+            [attr.selected]="hebrewButtonSelected() ? '' : null"
+            (click)="toggleHebrewButton()"
+          ></motion-button>
+        </div>
+        <h3>Hebrew / RTL</h3>
+        <code-block [tabs]="snippets['hebrewButton']"></code-block>
       </article>
     </div>
   </section>
