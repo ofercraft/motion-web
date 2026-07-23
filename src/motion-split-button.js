@@ -7,9 +7,30 @@ const styles = `
     vertical-align: middle;
   }
 
+  :host([data-motion-level="none"]) {
+    --motion-split-corner-duration: 0ms;
+    --motion-split-corner-easing: linear;
+  }
+
   :host([data-motion-level="low"]) {
-    --motion-split-corner-duration: 340ms;
-    --motion-split-corner-easing: cubic-bezier(.2, 1.7, .35, 0.85);
+    --motion-split-corner-duration: 220ms;
+    --motion-split-corner-easing: cubic-bezier(.34, 1.25, .64, 1);
+    --motion-split-pressed-inner-radius: calc(var(--motion-split-full-radius) * 0.7);
+    --motion-split-pressed-outer-radius: calc(var(--motion-split-full-radius) * 0.85);
+  }
+
+  :host([data-motion-level="medium"]) {
+    --motion-split-corner-duration: 260ms;
+    --motion-split-corner-easing: cubic-bezier(.34, 1.4, .64, 1);
+    --motion-split-pressed-inner-radius: calc(var(--motion-split-full-radius) * 0.85);
+    --motion-split-pressed-outer-radius: var(--motion-split-full-radius);
+  }
+
+  :host([data-motion-level="high"]) {
+    --motion-split-corner-duration: 320ms;
+    --motion-split-corner-easing: cubic-bezier(.34, 1.6, .64, 1);
+    --motion-split-pressed-inner-radius: var(--motion-split-full-radius);
+    --motion-split-pressed-outer-radius: var(--motion-split-full-radius);
   }
 
   .split {
